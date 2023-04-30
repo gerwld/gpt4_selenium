@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.service import Service as ChromeService
 
 BASE_URL = 'https://realpython.com'
+PATH_TO_LINKS = './posts/links.txt';
 
 # Ініціалізація сервісу, опшинів хедлес бравзеру
 chromedriver = '/usr/local/bin/chromedriver'
@@ -29,8 +30,11 @@ for a in allLinksToArticles:
 
 
 #створення нового файлу з усіма лінками
-filename = './posts/links.txt';
-os.makedirs(os.path.dirname(filename), exist_ok=True)
+if allLinksToArticlesInline :
+    count = allLinksToArticlesInline.count('\n')
 
-with open(filename, 'w+') as f:
-    f.write(allLinksToArticlesInline)
+    os.makedirs(os.path.dirname(PATH_TO_LINKS), exist_ok=True)
+
+    with open(PATH_TO_LINKS, 'w+') as f:
+        f.write(allLinksToArticlesInline)
+    print(f'Successfully added {count} links to ' + PATH_TO_LINKS)
