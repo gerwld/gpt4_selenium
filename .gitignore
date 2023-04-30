@@ -11,6 +11,7 @@ __pycache__/
 build/
 posts/
 md_posts/
+md_posts*/
 develop-eggs/
 dist/
 downloads/
