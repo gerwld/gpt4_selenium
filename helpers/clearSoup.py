@@ -9,11 +9,11 @@ def clearSoup(content):
         tags.attrs = {}
     prettified = content.prettify()
     # [^\x00-\x7F]+ видаляє всі non-ASCII
-    trimmedText = re.sub(r'[^\x00-\x7F]+', '', str(prettified))
-    trimmedTextNoDoubleSpaces = re.sub(r'\n  ', ' ', str(trimmedText)).strip()
-    trimmedTextNoSpacesAtTheBegining = re.sub(
-        r'\>\s+', '>', str(trimmedTextNoDoubleSpaces)).strip()
+    t = re.sub(r'[^\x00-\x7F]+', '', str(prettified))
+    tNoDoubleSpaces = re.sub(r'\n  ', ' ', str(t)).strip()
+    tNoSpacesAtTheBegining = re.sub(
+        r'\>\s+', '>', str(tNoDoubleSpaces)).strip()
 
     trimmedNoAmp = re.sub(
-        r'\&amp; ', '', str(trimmedTextNoSpacesAtTheBegining)).strip()
+        r'\&amp; ', '', str(tNoSpacesAtTheBegining)).strip()
     return trimmedNoAmp

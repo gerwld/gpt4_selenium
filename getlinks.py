@@ -34,3 +34,6 @@ if allLinksToArticlesInline:
     with open(PATH_TO_LINKS, 'w+') as f:
         f.write(allLinksToArticlesInline)
     print(f'Successfully added {count} links to ' + PATH_TO_LINKS)
+
+
+browser.quit()

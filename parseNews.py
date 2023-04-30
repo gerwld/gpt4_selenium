@@ -1,8 +1,7 @@
-import os
 import time
 import random
-from selenium import webdriver
 from bs4 import BeautifulSoup
+from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from helpers.filter_valid_links import filter_valid_links
 from global_context import PATH_TO_LINKS, PATH_TO_POSTS, DEL_TAGS, STRIP_TAGS, TITLE_SELECTOR
@@ -56,3 +55,5 @@ if uniqueLinks and len(uniqueLinks):
         time.sleep(delay)
 
     print(PATH_TO_POSTS)
+
+    browser.quit()
