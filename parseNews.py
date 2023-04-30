@@ -5,8 +5,10 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.service import Service as ChromeService
 from helpers.filter_valid_links import filter_valid_links
-from global_context import PATH_TO_LINKS, PATH_TO_POSTS
+from global_context import PATH_TO_LINKS, PATH_TO_POSTS, DEL_TAGS, STRIP_TAGS, TITLE_SELECTOR
 from helpers.createPost import createPost
+from helpers.clearSoup import clearSoup
+from helpers.stripSoup import stripSoup
 
 
 # Ініціалізація сервісу, опшинів хедлес бравзеру
@@ -34,10 +36,23 @@ if uniqueLinks and len(uniqueLinks):
     for link in uniqueLinks:
         browser.get(link)
         postHtml = browser.page_source
-        postSoup = BeautifulSoup(postHtml, 'html5lib')
+        postSoup = BeautifulSoup(
+            postHtml, 'html5lib').select_one('.article-body')
         print(f'Getting post from {link}')
+        postTitle = postSoup.find(
+            TITLE_SELECTOR).get_text()
 
-        createPost(postSoup.select_one('.article-body'))
-        time.sleep(random.randint(2, 8))
+        # трімінг супа
+        for tag in DEL_TAGS:
+            delTagAll = postSoup.find_all(tag)
+            for match in delTagAll:
+                match.decompose()
+
+        stripedSoup = stripSoup(postSoup, STRIP_TAGS)
+        clearedSoup = clearSoup(stripedSoup)
+
+        delay = random.randint(2, 8)
+        createPost(postTitle, clearedSoup, delay)
+        time.sleep(delay)
 
     print(PATH_TO_POSTS)
