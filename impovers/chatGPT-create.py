@@ -5,7 +5,7 @@ from impovers.handlers.gptHandler import Handler
 from helpers.createPost import createPost
 from global_context import POSTS_TO_MD, PATH_TO_POSTS, MD_SET_DATE
 
-message = "make post not plagiarized, keep the structure, make it at least 1500 words length, put code in the code tag (only if exist), avoid using any tags except (<h1>, <p>,<code>, <ul>, <li>, <a>). answer just with post: \n"
+message = "make post not plagiarized, keep the structure, make it in range between 1000 - 1500 words length, answer just with post: \n"
 
 # отримання постів і прохід по ним, якщо існують
 if not os.path.exists(POSTS_TO_MD):
