@@ -10,8 +10,8 @@ __pycache__/
 .Python
 build/
 posts/
-md_posts/
-md_posts*/
+res/
+res/*
 develop-eggs/
 dist/
 downloads/

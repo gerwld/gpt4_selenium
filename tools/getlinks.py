@@ -30,7 +30,6 @@ if allLinksToArticlesInline:
     count = allLinksToArticlesInline.count('\n')
 
     os.makedirs(os.path.dirname(PATH_TO_LINKS), exist_ok=True)
-
     with open(PATH_TO_LINKS, 'w+') as f:
         f.write(allLinksToArticlesInline)
     print(f'Successfully added {count} links to ' + PATH_TO_LINKS)

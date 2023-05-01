@@ -1,21 +1,23 @@
 import os
-from global_context import PATH_TO_MDPOSTS
+from global_context import PATH_TO_MDPOSTS, MD_SET_DATE
 from helpers.onlyAllowed import onlyAllowed
 
 counter = 0
 
 
-def createMdPost(set_date, title, postData):
+def createMdPost(set_date, title, postData, stage=''):
     # створення назви статті
     if title:
         trimedTitleArr = map(str.lower, onlyAllowed(
-            my_string=str(title)).split(' '))
-        trimedTitle = set_date + "-" + "-".join(trimedTitleArr)[:-1]
+            my_string=str(title).strip()).split(' '))
+        trimedTitle = set_date + "-" + "-".join(trimedTitleArr)
 
-    # якщо є назва - створити .md-шники
+    # якщо є назва - створити .md-шники в PATH_TO_MDPOSTS зі стейджем
     if trimedTitle and len(trimedTitle):
-        os.makedirs(os.path.dirname(PATH_TO_MDPOSTS), exist_ok=True)
-        with open(PATH_TO_MDPOSTS + f'/{trimedTitle}.md', 'w+') as f:
+        pathWithStage = PATH_TO_MDPOSTS + stage + '/' + MD_SET_DATE + '/'
+
+        os.makedirs(os.path.dirname(pathWithStage), exist_ok=True)
+        with open(pathWithStage + f'/{trimedTitle}.md', 'w+') as f:
             f.write(str(postData))
             global counter
             counter += 1

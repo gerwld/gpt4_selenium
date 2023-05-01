@@ -3,11 +3,12 @@ import random
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
-from helpers.filter_valid_links import filter_valid_links
-from global_context import PATH_TO_LINKS, PATH_TO_POSTS, DEL_TAGS, STRIP_TAGS, TITLE_SELECTOR
+from helpers.filterValidLinks import filterValidLinks
+from global_context import PATH_TO_LINKS, PATH_TO_POSTS, DEL_TAGS, STRIP_TAGS, TITLE_SELECTOR, FETCH_NO_TAGS
 from helpers.createPost import createPost
 from helpers.clearSoup import clearSoup
 from helpers.stripSoup import stripSoup
+from helpers.delTagsSoup import delTagsSoup
 
 
 # Ініціалізація сервісу, опшинів хедлес бравзеру
@@ -20,7 +21,7 @@ browser = webdriver.Chrome(service=service, options=options)
 # отримання ссилок і мепінг в массив
 with open(PATH_TO_LINKS, 'r') as f:
     links = f.read().split("\n")
-    uniqueLinks = list(filter_valid_links(links))
+    uniqueLinks = list(filterValidLinks(links))
 
     if (len(uniqueLinks)):
         print(f'Successfully parsed links from ' +
@@ -46,12 +47,15 @@ if uniqueLinks and len(uniqueLinks):
             delTagAll = postSoup.find_all(tag)
             for match in delTagAll:
                 match.decompose()
-
         stripedSoup = stripSoup(postSoup, STRIP_TAGS)
+
+        # трімінг супа в залежності чи залишити теги
         clearedSoup = clearSoup(stripedSoup)
+        noTagedSoup = delTagsSoup(stripedSoup)
+        finalPost = (clearedSoup, noTagedSoup)[FETCH_NO_TAGS]
 
         delay = random.randint(2, 8)
-        createPost(postTitle, clearedSoup, delay)
+        createPost(postTitle, finalPost, delay)
         time.sleep(delay)
 
     print(PATH_TO_POSTS)
