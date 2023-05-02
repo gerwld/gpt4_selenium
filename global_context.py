@@ -1,5 +1,6 @@
 
 import time
+from colorist import ColorRGB
 
 BASE_URL = 'https://realpython.com'
 
@@ -41,3 +42,6 @@ STRIP_TAGS = [["div", {"class": "article-body"}],
               "i",]
 
 MD_PROPS = ['layout: post']
+
+C_BLUE = ColorRGB(121, 220, 154)
+C_RED = ColorRGB(222, 79, 84)

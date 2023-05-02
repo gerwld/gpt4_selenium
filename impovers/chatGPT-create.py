@@ -4,6 +4,7 @@ import random
 from impovers.handlers.gptHandler import Handler
 from helpers.createPost import createPost
 from global_context import POSTS_TO_MD, PATH_TO_POSTS, MD_SET_DATE
+from impovers.handlers.auth import GPT_AUTH_TUPPLE, apply_tuple
 
 message = "make post not plagiarized, keep the structure, make it in range between 1000 - 1500 words length, answer just with post: \n"
 
@@ -22,7 +23,7 @@ else:
 
     # якщо є пости, запит на chatGPT через хандлер
     if htmlPosts and len(htmlPosts):
-        chatgpt = Handler('patryk.jaworski003@gmail.com', 'aboba12341234')
+        chatgpt = Handler(*GPT_AUTH_TUPPLE)
 
         for page in htmlPosts:
             delay = random.randint(2, 8)

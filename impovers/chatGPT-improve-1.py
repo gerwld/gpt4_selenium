@@ -4,11 +4,13 @@ import random
 from impovers.handlers.gptHandler import Handler
 from helpers.createPost import createPost
 from global_context import PATH_TO_POSTS, MD_SET_DATE
+from impovers.handlers.auth import GPT_AUTH_TUPPLE, apply_tuple
 
 message = "text down below. make it as html, but don't change the text:\n"
 
+MD_STEP_NAME = "_gpt_1/"
 PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt/" + MD_SET_DATE + "/"
-PATH_TO_CURRENT_STEP = PATH_TO_POSTS + "_gpt_1/" + MD_SET_DATE + "/"
+PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 
 # отримання постів і прохід по ним, якщо існують
@@ -29,7 +31,7 @@ else:
 
     # якщо є пости, запит на chatGPT через хандлер
     if prevPosts and len(prevPosts):
-        chatgpt = Handler('patryk.jaworski003@gmail.com', 'aboba12341234')
+        chatgpt = Handler(*GPT_AUTH_TUPPLE)
 
         for page in prevPosts:
             delay = random.randint(2, 8)
@@ -53,7 +55,7 @@ else:
 
                 # створення поста зі стейджем
                 title = str(page).split('.')[0]
-                createPost(title, answer, delay, "_gpt_1/")
+                createPost(title, answer, delay, MD_STEP_NAME)
 
                 time.sleep(delay)
 
