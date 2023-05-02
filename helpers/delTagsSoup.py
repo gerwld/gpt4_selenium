@@ -2,14 +2,7 @@ import re
 
 
 def delTagsSoup(content):
-    # content.attrs = {}
-    # for tags in content.findAll(True):
-    #     if len(tags.get_text(strip=True)) == 0 and tags.name not in ['br', 'img']:
-    #         tags.extract()
-    #     tags.attrs = {}
-    # prettified = content.prettify()
-
-    prettified = content.get_text()
+    prettified = content.prettify()
 
     # [^\x00-\x7F]+ видаляє всі non-ASCII
     t = re.sub(r'[^\x00-\x7F]+', '', str(prettified))
@@ -19,5 +12,4 @@ def delTagsSoup(content):
 
     trimmedNoAmp = re.sub(
         r'\&amp; ', '', str(tNoSpacesAtTheBegining)).strip()
-
     return trimmedNoAmp

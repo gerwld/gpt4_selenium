@@ -1,5 +1,5 @@
 import os
-from global_context import PATH_TO_MDPOSTS, MD_SET_DATE
+from global_context import PATH_TO_MDPOSTS, MD_SET_DATE, C_GREEN, C_BLUE
 from helpers.onlyAllowed import onlyAllowed
 
 counter = 0
@@ -22,5 +22,5 @@ def createMdPost(set_date, title, postData, stage=''):
             global counter
             counter += 1
 
-        print(f'Converted post #{counter} to ' + PATH_TO_MDPOSTS +
-              f'{trimedTitle}.md, delay: 0s' + '\n--------------')
+        print(f'{C_GREEN}Converted post #{counter} to {C_GREEN.OFF}{C_BLUE}' + PATH_TO_MDPOSTS +
+              f'{trimedTitle}.md{C_BLUE.OFF}, delay: 0s' + '\n--------------')

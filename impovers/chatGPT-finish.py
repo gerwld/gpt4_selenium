@@ -3,10 +3,10 @@ import time
 import random
 from impovers.handlers.gptHandler import Handler
 from helpers.createPost import createPost
-from global_context import PATH_TO_POSTS, MD_SET_DATE, C_BLUE
+from global_context import PATH_TO_POSTS, MD_SET_DATE, C_GREEN
 from impovers.handlers.auth import GPT_AUTH_TUPPLE, apply_tuple
 
-message = "write a short poem, end it with dot. 20 words max:\n"
+message = "Finish the post down below, do not change post, just finish it:\n"
 
 MD_STEP_NAME = "_gpt_finished/"
 PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt/" + MD_SET_DATE + "/"
@@ -31,10 +31,10 @@ else:
 
     # якщо немає постів прінт, інакше запит на chatGPT через хандлер
     if not notFinishedPosts or not len(notFinishedPosts):
-        print(f'{C_BLUE}Founded {len(notFinishedPosts)} uncompleted posts out of {len(prevPosts)}. Starting...{C_BLUE.OFF}\n' + str(notFinishedPosts))
+        print(f'{C_GREEN}Founded {len(notFinishedPosts)} uncompleted posts out of {len(prevPosts)}. Starting...{C_GREEN.OFF}\n' + str(notFinishedPosts))
 
     else:
-        print(f'{C_BLUE}Founded {len(notFinishedPosts)} uncompleted posts out of {len(prevPosts)}. Starting...{C_BLUE.OFF}\n' + str(notFinishedPosts))
+        print(f'{C_GREEN}Founded {len(notFinishedPosts)} uncompleted posts out of {len(prevPosts)}. Starting...{C_GREEN.OFF}\n' + str(notFinishedPosts))
         chatgpt = Handler(*GPT_AUTH_TUPPLE)
 
         for page in notFinishedPosts:

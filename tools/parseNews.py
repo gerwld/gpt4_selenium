@@ -4,11 +4,12 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from helpers.filterValidLinks import filterValidLinks
-from global_context import PATH_TO_LINKS, PATH_TO_POSTS, DEL_TAGS, STRIP_TAGS, TITLE_SELECTOR, FETCH_NO_TAGS
+from global_context import PATH_TO_LINKS, PATH_TO_POSTS, DEL_TAGS, STRIP_TAGS, TITLE_SELECTOR, FETCH_NO_TAGS, DEL_CLASS, DEL_PHRASES
 from helpers.createPost import createPost
 from helpers.clearSoup import clearSoup
 from helpers.stripSoup import stripSoup
 from helpers.delTagsSoup import delTagsSoup
+from helpers.delPhrasesSoup import *
 
 
 # Ініціалізація сервісу, опшинів хедлес бравзеру
@@ -37,25 +38,30 @@ if uniqueLinks and len(uniqueLinks):
         browser.get(link)
         postHtml = browser.page_source
         postSoup = BeautifulSoup(
-            postHtml, 'html5lib').select_one('.article-body')
+            postHtml, 'html5lib').find(id="main")
         print(f'Getting post from {link}')
         postTitle = postSoup.find(
             TITLE_SELECTOR).get_text()
 
         # трімінг супа
         for tag in DEL_TAGS:
-            delTagAll = postSoup.find_all(tag)
-            for match in delTagAll:
+            for match in postSoup.find_all(tag):
                 match.decompose()
-        stripedSoup = stripSoup(postSoup, STRIP_TAGS)
+
+        for tag in DEL_CLASS:
+            for match in postSoup.find_all(class_=tag):
+                match.decompose()
 
         # трімінг супа в залежності чи залишити теги
-        clearedSoup = clearSoup(stripedSoup)
-        noTagedSoup = delTagsSoup(stripedSoup)
+        clearedSoup = clearSoup(postSoup)
+        noTagedSoup = delTagsSoup(postSoup)
         finalPost = (clearedSoup, noTagedSoup)[FETCH_NO_TAGS]
 
+        strFinalPost = stripSoup(finalPost, STRIP_TAGS)
+        delStrFinalPost = delPhrasesSoup(strFinalPost, DEL_PHRASES)
+
         delay = random.randint(2, 8)
-        createPost(postTitle, finalPost, delay)
+        createPost(postTitle, strFinalPost, delay)
         time.sleep(delay)
 
     print(PATH_TO_POSTS)

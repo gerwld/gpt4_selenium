@@ -1,13 +1,13 @@
 import os
 from bs4 import BeautifulSoup
-from global_context import POSTS_TO_MD, TITLE_SELECTOR, MD_SET_DATE, MD_PROPS, MD_PREFIX
+from global_context import POSTS_TO_MD, TITLE_SELECTOR, MD_SET_DATE, MD_PROPS, MD_PREFIX, C_RED
 from helpers.trimText import titlecase
 from helpers.createMdPost import createMdPost
 
 
 # отримання постів і прохід по ним, якщо існують
 if not os.path.exists(POSTS_TO_MD):
-    print(f'POSTS_TO_MD: {POSTS_TO_MD} do not exist in $convertToMdPosts')
+    print(f'{C_RED}convertToMdPosts: {POSTS_TO_MD} do not exist.{C_RED.OFF}')
 else:
     htmlPosts = os.listdir(os.path.dirname(POSTS_TO_MD))
 
@@ -31,8 +31,9 @@ else:
                 mdPageContent += '---\n\n'
                 titleObj.extract()
 
-                # (3) формування контенту md
-                content = contentSoup.find('body').contents
+                # (3) формування контенту md (якщо приходить строка стетати її, інакше прохід по супу)
+                content = type(contentSoup) == str if contentSoup else contentSoup.find(
+                    'body').contents
                 for childs in content:
                     mdPageContent += str(childs)
 

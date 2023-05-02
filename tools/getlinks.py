@@ -12,17 +12,21 @@ service = ChromeService(executable_path=chromedriver)
 browser = webdriver.Chrome(service=service, options=options)
 
 # Переход на сторінку i отримання змісту
-browser.get(BASE_URL + '/search')
+browser.get(BASE_URL)
 requiredHtml = browser.page_source
 
 # Парсінг всіх ссилок на пости
 soup = BeautifulSoup(requiredHtml, 'html5lib')
 
-parentDiv = soup.find(id="resultsArea")
-allLinksToArticles = parentDiv.select('.stretched-link')
+parentDiv = soup.find(id="main-box-1")
+allLinksToArticles = parentDiv.select('.entry-title:has(a)')
+
 allLinksToArticlesInline = ''
-for a in allLinksToArticles:
-    allLinksToArticlesInline += (BASE_URL + a['href'] + '\n')
+print(allLinksToArticles)
+for h2 in allLinksToArticles:
+    link = h2.find('a')
+
+    allLinksToArticlesInline += (link['href'] + '\n')
 
 
 # створення нового файлу з усіма лінками

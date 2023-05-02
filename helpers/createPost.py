@@ -1,5 +1,5 @@
 import os
-from global_context import PATH_TO_POSTS, MD_SET_DATE
+from global_context import PATH_TO_POSTS, MD_SET_DATE, C_BLUE, C_GREEN
 from helpers.onlyAllowed import onlyAllowed
 
 counter = 0
@@ -22,5 +22,5 @@ def createPost(title, postData, delay, stage=''):
             global counter
             counter += 1
 
-        print(f'Added post #{counter} to ' + pathWithStage +
-              f'{trimedTitle}.html, delay: {delay}s' + '\n--------------')
+        print(f'{C_GREEN}Added post #{counter} to {C_GREEN.OFF}{C_BLUE}' + pathWithStage +
+              f'{trimedTitle}.html{C_BLUE.OFF}, delay: {delay}s' + '\n--------------')
