@@ -17,5 +17,6 @@ def stripSoup(soup, strip_tags):
 
     # повертає суп
     newSoup = BeautifulSoup(locSoup, 'html5lib')
+    newSoup.find('body').name = 'article'
 
-    return newSoup.find('body')
+    return newSoup.find('article')

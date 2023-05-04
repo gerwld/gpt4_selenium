@@ -17,4 +17,4 @@ else:
                 # перевірка чи пост валідний і створення посту
                 if isPostValid(pageContent.read()):
                     createPost(page.split('.')[0],
-                               pageContent.read(), 0, '_valid')
+                               pageContent.read(), 0, '_valid/')

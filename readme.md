@@ -32,5 +32,5 @@ python -m tools.convertToMdPosts
 ### ChatGpt:
 
 ```
-python -m impovers.chatGPT
+python -m improvers.chatGPT
 ```

@@ -31,6 +31,7 @@ class Handler:
         if not cold_start:
             self.pass_verification()
             self.login(username, password)
+            # self.browser.get("https://chat.openai.com/?model=gpt-4")
 
     def pass_verification(self):
         while self.check_login_page():
@@ -106,6 +107,7 @@ class Handler:
         return
 
     def interact(self, question: str):
+        # self.browser.get("https://chat.openai.com/?model=gpt-4")
         """Function to get an answer for a question"""
         text_area = self.browser.find_element(By.TAG_NAME, 'textarea')
         for each_line in question.split("\n"):

@@ -19,19 +19,26 @@ POSTS_TO_MD = PATH_TO_POSTS + MD_PREFIX + "/" + MD_SET_DATE + "/"
 FETCH_NO_TAGS = False
 
 # ліміт по словам для фільтрації
-MIN_WORDS_LIMIT = 700
-MAX_WORDS_LIMIT = 5000
+MIN_WORDS_LIMIT = 300
+MAX_WORDS_LIMIT = 9000
+
+# скільки разів пінгувати при обриві відповіді chatGPT. Оптимально - від 2 до 4, щоб виключити 0
+MAX_PING_TRIES = 3
 
 
 TITLE_SELECTOR = 'h1'
 
 DEL_PHRASES = [
     "<p>Press&lt;Enter&gt;. </p>",
-    "&lt;"
+    "<p>Press Enter\&gt;. </p>",
+    "<p>Press Enter&gt;. </p>",
+    "<p>Press&lt;Enter&gt;. </p>",
+    "<p>Press\&lt;Enter\&gt;. </p>",
 ]
 
 DEL_CLASS = [
     "entry-meta",
+    "adthrive"
 ]
 
 DEL_TAGS = [
@@ -52,7 +59,10 @@ DEL_TAGS = [
     "button",
     "progress",
     "style"]
+
 STRIP_TAGS = [
+    "article",
+    "header",
     "html",
     "head",
     "body",

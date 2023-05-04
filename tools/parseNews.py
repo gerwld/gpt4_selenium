@@ -58,10 +58,10 @@ if uniqueLinks and len(uniqueLinks):
         finalPost = (clearedSoup, noTagedSoup)[FETCH_NO_TAGS]
 
         strFinalPost = stripSoup(finalPost, STRIP_TAGS)
-        delStrFinalPost = delPhrasesSoup(strFinalPost, DEL_PHRASES)
+        delPhFinalPost = delPhrasesSoup(strFinalPost, DEL_PHRASES)
 
         delay = random.randint(2, 8)
-        createPost(postTitle, strFinalPost, delay)
+        createPost(postTitle, delPhFinalPost, delay)
         time.sleep(delay)
 
     print(PATH_TO_POSTS)

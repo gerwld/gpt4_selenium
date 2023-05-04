@@ -1,10 +1,10 @@
 import os
 import time
 import random
-from impovers.handlers.gptHandler import Handler
+from improvers.handlers.gptHandler import Handler
 from helpers.createPost import createPost
-from global_context import PATH_TO_POSTS, MD_SET_DATE, C_GREEN
-from impovers.handlers.auth import GPT_AUTH_TUPPLE, apply_tuple
+from global_context import PATH_TO_POSTS, MD_SET_DATE, C_GREEN, MAX_PING_TRIES
+from improvers.handlers.auth import GPT_AUTH_TUPPLE
 
 message = "Finish the post down below, do not change post, just finish it:\n"
 
@@ -50,7 +50,7 @@ else:
                     break
 
                 # пінгування щоб обійти ліміт і обрив генерації (0 щоб виключити)
-                maxPingTries = 0
+                maxPingTries = MAX_PING_TRIES
                 startswith = ("sure", "i'm sorry",
                               "thats all", "that's all", 'what')
                 while maxPingTries > 0 and (answer[-1] != '.' or answer[-1] != '>' or not answer.lower().startswith(startswith)):

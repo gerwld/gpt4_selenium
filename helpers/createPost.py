@@ -14,7 +14,7 @@ def createPost(title, postData, delay, stage=''):
 
     # якщо є назва - створити .html-пейджі
     if trimedTitle and len(trimedTitle):
-        pathWithStage = PATH_TO_POSTS + stage + '/' + MD_SET_DATE + '/'
+        pathWithStage = PATH_TO_POSTS + stage + MD_SET_DATE
 
         os.makedirs(os.path.dirname(pathWithStage), exist_ok=True)
         with open(pathWithStage + f'/{trimedTitle}.html', 'w+') as f:
@@ -23,4 +23,4 @@ def createPost(title, postData, delay, stage=''):
             counter += 1
 
         print(f'{C_GREEN}Added post #{counter} to {C_GREEN.OFF}{C_BLUE}' + pathWithStage +
-              f'{trimedTitle}.html{C_BLUE.OFF}, delay: {delay}s' + '\n--------------')
+              f'/{trimedTitle}.html{C_BLUE.OFF}, delay: {delay}s' + '\n--------------')
