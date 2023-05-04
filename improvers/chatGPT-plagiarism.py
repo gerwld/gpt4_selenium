@@ -11,7 +11,7 @@ message = "2 posts, first post is have to be changed to be not plagiarism refer 
 
 MD_STEP_NAME = "_gpt_plagiarism/"
 PATH_TO_ORIGINAL = PATH_TO_POSTS + "/" + MD_SET_DATE + "/"
-PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_improve_2/" + MD_SET_DATE + "/"
+PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_improved/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 
@@ -42,7 +42,7 @@ else:
             with open(PATH_TO_PREV_STEP + page) as prevStepPageContent:
                 with open(PATH_TO_ORIGINAL + page) as originalContent:
                     print(f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
-
+                    # запит з 2 постами
                     gptRequest = message + \
                         "\nfirst post:\n" + \
                         prevStepPageContent.read() + \

@@ -7,9 +7,9 @@ from helpers.isPostValid import *
 from global_context import PATH_TO_POSTS, MD_SET_DATE, C_RED, MAX_PING_TRIES
 from improvers.handlers.auth import GPT_AUTH_TUPPLE
 
-message = "task: change: variable names, code comments and code example subjects. to avoid plagiarism. Paragraphs is already unique. Add SEO optimizations, SEO title, but, most important - keep: the original context, tags, answer just with the article, without seo words:\n"
+message = "change only code examples variables, variable titles, code comments, make them unique to avoid plagiarism, but keep the original text of article. change only code examples. If there is abstract example - like humans, cars, fruits - make them original too. most important - do not change main title and topic, even a symbol of it:\n"
 
-MD_STEP_NAME = "_gpt_improve/"
+MD_STEP_NAME = "_gpt_improved/"
 PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
@@ -33,7 +33,7 @@ else:
     # якщо є пости, запит на chatGPT через хандлер
     if prevPosts and len(prevPosts):
         print(
-            f'{C_GREEN}Starting the chatGPT-improve [Save directory: {PATH_TO_CURRENT_STEP}]...{C_GREEN.OFF}')
+            f'{C_GREEN}Starting the chatGPT-improve-2 [Save directory: {PATH_TO_CURRENT_STEP}]...{C_GREEN.OFF}')
         chatgpt = Handler(*GPT_AUTH_TUPPLE)
 
         for page in prevPosts:
