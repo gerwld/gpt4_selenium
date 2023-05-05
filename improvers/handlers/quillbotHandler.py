@@ -1,65 +1,63 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import *
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.service import Service as ChromeService
-
-import os
 import time
-
-# Ініціалізація сервісу, опшинів хедлес бравзеру
-chromedriver = '/usr/local/bin/chromedriver'
-options = webdriver.ChromeOptions()
-options.binary_location = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-# options.add_argument('headless')  # для открытия headless-браузера
-service = ChromeService(executable_path=chromedriver)
-driver = webdriver.Chrome(service=service, options=options)
+import undetected_chromedriver as uc
+from selenium.webdriver.common.by import By
 
 
-driver.execute_script("window.open('');")
-driver.switch_to.window(driver.window_handles[0])
-driver.get("http://www.quillbot.com")
+class QuillbotHandler:
+    input_to_iq = "paraphraser-input-box"
+    output_to_xq = "//*[@id='output-sentence-box~0']"
+    submit_btn_xq = "//*[@id='controlledInputBoxContainer']/div[2]/div/div/div[2]/div/button"
+    fluent_btn_xq = "//*[@id='Paraphraser - mode - tab - 1']"
+    cookies_btn_iq = "onetrust-accept-btn-handler"
+    result_xq = "//*[@id='paraphraser-output-box']"
 
-wait = WebDriverWait(driver, 80, poll_frequency=1,
-                     ignored_exceptions=[NoSuchElementException,
-                                         ElementNotVisibleException,
-                                         ElementNotSelectableException])
+    def __init__(self, headless: bool = False):
+        options = uc.ChromeOptions()
+        options.add_argument("--incognito")
+        options.binary_location = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 
-accept_cookies_btn = WebDriverWait(driver, 15).until(
-    EC.element_to_be_clickable((By.ID, "onetrust-accept-btn-handler"))).click()
-print("accept_cookies_btn clicked")
+        if headless:
+            options.add_argument("--headless=new")
 
+        self.browser = uc.Chrome(options=options)
+        self.browser.set_page_load_timeout(15)
 
-fluent_btn = WebDriverWait(driver, 15).until(
-    EC.element_to_be_clickable((By.XPATH, "//*[@id='Paraphraser - mode - tab - 1']"))).click()
-print("Fluent clicked")
+        self.browser.get("http://www.quillbot.com")
 
+    def sleepy_find_element(self, by, query, attempt_count: int = 20, sleep_duration: int = 1):
+        """If the loading time is a concern, this function helps"""
+        for _ in range(attempt_count):
+            item = self.browser.find_elements(by, query)
+            if len(item) > 0:
+                item = item[0]
+                break
+            time.sleep(sleep_duration)
+        return item
 
-while True:
-    input_to = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.ID, "paraphraser-input-box"))).clear()
-    print("input_to cleared")
+    def interact(self, paragraph):
+        """Function to get an responce to request"""
+        accept_cookies_btn = self.browser.find_elements(
+            By.ID, self.cookies_btn_iq)
+        try:
+            accept_cookies_btn[0].click()
+        except:
+            print('No accept cookies button found.')
 
-    input_to = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.ID, "paraphraser-input-box"))).send_keys("One of the important data structures in Bash, the most popular shell in Linux, is the associative array. This type \
-                                                                                of array enables you to store key-value pairs. In this article, we will explain how associative arrays work in Bash \
-                                                                                and how to use them effectively.")
+        fluent_btn = self.sleepy_find_element(By.XPATH, self.fluent_btn_xq)
+        fluent_btn.click()
 
-    # нажимає на баттон з делаєм
-    time.sleep(1)
-    driver.find_element(
-        By.XPATH, "//*[@id='controlledInputBoxContainer']/div[2]/div/div/div[2]/div/button").click()
-    print("input_to sended")
+        input_to = self.sleepy_find_element(By.ID, self.input_to_iq)
+        input_to.clear()
+        input_to.send_keys(paragraph)
 
-    # driver.switch_to.window(driver.window_handles[0])
+        time.sleep(1)
+        submit_btn = self.browser.find_element(By.XPATH, self.submit_btn_xq)
+        submit_btn.click()
 
-    Element = wait.until(EC.visibility_of_element_located(
-        (By.XPATH, "//*[@id='output-sentence-box~0']")))
-    time.sleep(8)
+        output_to = self.sleepy_find_element(
+            By.XPATH, self.output_to_xq)
+        time.sleep(8)
 
-    quilled = driver.find_element(
-        By.XPATH, "//*[@id='paraphraser-output-box']")
-    print('text:', quilled.text)
-    time.sleep(4)
+        if output_to:
+            result = self.sleepy_find_element(By.XPATH, self.result_xq)
+            return result.text

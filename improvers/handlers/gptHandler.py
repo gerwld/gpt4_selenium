@@ -19,7 +19,6 @@ class Handler:
                  headless: bool = True, cold_start: bool = False):
         options = uc.ChromeOptions()
         options.add_argument("--incognito")
-        options.add_argument("--headless=new")
 
         if headless:
             options.add_argument("--headless=new")
@@ -31,7 +30,6 @@ class Handler:
         if not cold_start:
             self.pass_verification()
             self.login(username, password)
-            # self.browser.get("https://chat.openai.com/?model=gpt-4")
 
     def pass_verification(self):
         while self.check_login_page():
