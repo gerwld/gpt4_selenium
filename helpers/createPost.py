@@ -1,3 +1,4 @@
+"""Створює пост і зберігає в PATH_TO_POSTS"""
 import os
 from global_context import PATH_TO_POSTS, MD_SET_DATE, C_BLUE, C_GREEN
 from helpers.onlyAllowed import onlyAllowed

@@ -1,3 +1,4 @@
+"""Entry-point, створює пост по референсу/ам і повертає максимально сирий пост"""
 import os
 import time
 import random
@@ -13,7 +14,7 @@ PATH_TO_CURRENT_STEP = PATH_TO_POSTS + "_gpt/" + MD_SET_DATE + "/"
 
 # отримання постів і прохід по ним, якщо існують
 if not os.path.exists(POSTS_TO_MD):
-    print(f'POSTS_TO_MD: {POSTS_TO_MD} do not exist in improvers.$')
+    print(f'{C_RED}chatGPT-create: {POSTS_TO_MD} do not exist.{C_RED.OFF}')
 else:
     # cтворення нової директорії PATH_TO_CURRENT_STEP якщо не існує
     os.makedirs(os.path.dirname(PATH_TO_CURRENT_STEP), exist_ok=True)

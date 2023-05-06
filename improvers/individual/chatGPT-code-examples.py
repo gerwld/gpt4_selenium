@@ -1,3 +1,4 @@
+"""Унікалізує приклади коду, змінює сабжект прикладів, коментарі. Залишає оригінальний зміст (наскільки можливо)"""
 import os
 import time
 import random
@@ -16,7 +17,7 @@ PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 # отримання постів і прохід по ним, якщо існують
 if not os.path.exists(PATH_TO_PREV_STEP):
-    print(f'POSTS_TO_MD: {PATH_TO_PREV_STEP} do not exist in improvers.$')
+    print(f'{C_RED}chatGPT-code-examples: {PATH_TO_PREV_STEP} do not exist.{C_RED.OFF}')
 else:
     # cтворення директорії якщо не існує
     if not os.path.exists(PATH_TO_CURRENT_STEP):

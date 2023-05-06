@@ -1,3 +1,4 @@
+"""Обходить AI Content Detectors, методом перефразу"""
 import os
 import time
 import random
@@ -8,8 +9,8 @@ from improvers.handlers.auth import QUILLBOT_AUTH
 from helpers.createPost import *
 from helpers.isPostValid import *
 
-MD_STEP_NAME = "_quillbot/"
-PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_plagiarism/" + MD_SET_DATE + "/"
+MD_STEP_NAME = "_qb_paraphrase/"
+PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_reorganize/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 SKIP_PARAGRAPHS_WITH = ["{", "}"]

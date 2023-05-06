@@ -1,3 +1,4 @@
+"""Обходить AI Content Detectors, методом GPT-4 перефразу"""
 import os
 import time
 import random
@@ -9,14 +10,14 @@ from improvers.handlers.auth import GPT_AUTH
 
 message = "Find last information how GPT model content is detected, and base on that rewrite the above content so that it is not detected as AI content by AI content detectors. Keep original structure and length:\n"
 
-MD_STEP_NAME = "_gpt_detection/"
-PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_improved/" + MD_SET_DATE + "/"
+MD_STEP_NAME = "_gpt_detectors/"
+PATH_TO_PREV_STEP = PATH_TO_POSTS + "_qb_paraphrase/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 
 # отримання постів і прохід по ним, якщо існують
 if not os.path.exists(PATH_TO_PREV_STEP):
-    print(f'POSTS_TO_MD: {PATH_TO_PREV_STEP} do not exist in improvers.$')
+    print(f'{C_RED}chatGPT4-detectors: {PATH_TO_PREV_STEP} do not exist.{C_RED.OFF}')
 else:
     # cтворення директорії якщо не існує
     if not os.path.exists(PATH_TO_CURRENT_STEP):
@@ -34,7 +35,7 @@ else:
     if prevPosts and len(prevPosts):
         print(
             f'{C_GREEN}Starting the chatGPT4-detectors [Save directory: {PATH_TO_CURRENT_STEP}]...{C_GREEN.OFF}')
-        chatgpt = chatGPTHandler(*GPT_AUTH, gpt4=True)
+        chatgpt = chatGPTHandler(*GPT_AUTH, gpt4=False)
 
         for page in prevPosts:
             delay = random.randint(1, 3)

@@ -1,9 +1,10 @@
+"""Фінальне 'полірування' по змісту"""
 import os
 import time
 import random
 from improvers.handlers.gptHandler import chatGPTHandler
 from helpers.createPost import createPost
-from global_context import PATH_TO_POSTS, MD_SET_DATE, C_GREEN, MAX_PING_TRIES
+from global_context import PATH_TO_POSTS, MD_SET_DATE, C_GREEN, C_RED, MAX_PING_TRIES
 from improvers.handlers.auth import GPT_AUTH
 
 message = "Finish the post down below, do not change post, just finish it:\n"
@@ -15,7 +16,8 @@ PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 # отримання постів і прохід по ним, якщо існують
 if not os.path.exists(PATH_TO_PREV_STEP):
-    print(f'improvers: {PATH_TO_PREV_STEP} do not exist in improvers.$')
+    print(f'{C_RED}chatGPT-finish: {PATH_TO_PREV_STEP} do not exist.{C_RED.OFF}')
+
 else:
     # cтворення нової директорії PATH_TO_CURRENT_STEP якщо не існує
     os.makedirs(os.path.dirname(PATH_TO_CURRENT_STEP), exist_ok=True)

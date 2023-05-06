@@ -1,3 +1,4 @@
+"""Хандлить запити на chat.openai.io"""
 import sys
 import time
 import undetected_chromedriver as uc

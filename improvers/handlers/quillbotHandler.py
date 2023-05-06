@@ -1,3 +1,4 @@
+"""Хандлить запити на Quillbot, проект для перевірки на AI Generated Content"""
 import time
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By

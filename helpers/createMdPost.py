@@ -1,3 +1,5 @@
+"""Створює mdпост і зберігає в PATH_TO_MDPOSTS"""
+
 import os
 from global_context import PATH_TO_MDPOSTS, MD_SET_DATE, C_GREEN, C_BLUE
 from helpers.onlyAllowed import onlyAllowed

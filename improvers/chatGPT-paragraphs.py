@@ -1,17 +1,22 @@
+"""Додає або віднімає subheadings, в залежності від кількості слів в post"""
 import os
-import re
 import time
 import random
+from bs4 import BeautifulSoup
 from improvers.handlers.gptHandler import chatGPTHandler
 from helpers.createPost import *
 from helpers.isPostValid import *
 from global_context import PATH_TO_POSTS, MD_SET_DATE, C_RED, MAX_PING_TRIES
 from improvers.handlers.auth import GPT_AUTH
 
-message_less = "if its possible - remove one most non informative paragraph from the post, but keep everything except it untouched, otherways return post as it is:\n"
-message_more = "add 1 - 2 more h2 to the post, add to each of them content under it, but keep everything except it untouched:\n"
 
-MD_STEP_NAME = "_gpt_paragraph/"
+count_less = random.randint(1, 2)
+count_more = random.randint(2, 3)
+
+message_less = f"remove {count_less} less informative subheading{'s' if count_less > 1 else ''} and it content from the post, keep everything exept it untouched:\n"
+message_more = f"add {count_more} more subheading{'s' if count_more > 1 else ''} with content, keep everything exept it untouched:\n"
+
+MD_STEP_NAME = "_gpt_paragraphs/"
 PATH_TO_ORIGINAL = PATH_TO_POSTS + "/" + MD_SET_DATE + "/"
 PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_plagiarism/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
@@ -19,7 +24,7 @@ PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 # отримання постів і прохід по ним, якщо існують
 if not os.path.exists(PATH_TO_PREV_STEP):
-    print(f'POSTS_TO_MD: {PATH_TO_PREV_STEP} do not exist')
+    print(f'{C_RED}chatGPT-paragraphs: {PATH_TO_PREV_STEP} do not exist.{C_RED.OFF}')
 else:
     # cтворення директорії якщо не існує
     if not os.path.exists(PATH_TO_CURRENT_STEP):
@@ -45,13 +50,19 @@ else:
                 print(f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
 
                 # перевірка довжини поста
-                wordsInPost = len(
-                    list(re.sub(r"<[^>]*>", pageContent.read().strip()).split(' ')))
-                print(wordsInPost)
-                # якщо довжина менше 3000 слів, додай, інакше забери
-                gptRequest = message_more + pageContent.read()
-                if wordsInPost > 3000:
-                    gptRequest = message_less + pageContent.read()
+                post = pageContent.read()
+                wordsInPost = len(BeautifulSoup(
+                    post, 'html5lib').get_text(' ', strip=True).split(' '))
+
+                # якщо довжина більше 2500 слів, відніми параграфи, інакше додай
+                gptRequest = message_more + post
+                if wordsInPost > 2500:
+                    print(
+                        '-'*110 + f'\n{C_GREEN}Words is more than 2500. Removing 1-3 paragraphs. Total words count: {wordsInPost} \n{C_GREEN.OFF}' + '-'*110)
+                    gptRequest = message_less + post
+                else:
+                    print(
+                        '-'*110 + f'\n{C_GREEN}Words is less than 2500. Adding 1-2 more. Total words count: {wordsInPost} \n{C_GREEN.OFF}' + '-'*110)
 
                 # запит
                 answer = chatgpt.interact(gptRequest)
@@ -69,7 +80,7 @@ else:
                 while maxPingTries > 0 and answer.strip().startswith('<article>') and not answer.strip().endswith('</article>') and not answer.strip().lower().startswith(break_words):
                     newAnswer = chatgpt.interact('keep going')
                     print(
-                        f"New request to fix layout, resp. ends with: {newAnswer[len(newAnswer) - 10 :]}")
+                        f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :]}")
 
                     if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
                         answer += newAnswer

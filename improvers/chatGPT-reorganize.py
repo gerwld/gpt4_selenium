@@ -1,4 +1,4 @@
-"""Звіряє 2 пости і змінює перший відносно другого, зменшуючи плагіат"""
+"""Реорганізовує subheadings в кожному пості, залишаючи зміст"""
 import os
 import time
 import random
@@ -8,17 +8,18 @@ from helpers.isPostValid import *
 from global_context import PATH_TO_POSTS, MD_SET_DATE, C_RED, MAX_PING_TRIES
 from improvers.handlers.auth import GPT_AUTH
 
-message = "2 posts, first post is have to be changed to be not plagiarism refer to the second post. don't use any of the text from the second post, use second post as a refer to rephrase simmilar phrases in the first post. Keep unique text as it is, return only first article:\n"
 
-MD_STEP_NAME = "_gpt_plagiarism/"
+message = "reorganize subheadings in post down below, improve subheadings titles SEO, keep them unique: \n"
+
+MD_STEP_NAME = "_gpt_reorganize/"
 PATH_TO_ORIGINAL = PATH_TO_POSTS + "/" + MD_SET_DATE + "/"
-PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_improved/" + MD_SET_DATE + "/"
+PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_paragraphs/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 
 # отримання постів і прохід по ним, якщо існують
 if not os.path.exists(PATH_TO_PREV_STEP):
-    print(f'{C_RED}chatGPT-plagiarism: {PATH_TO_PREV_STEP} do not exist.{C_RED.OFF}')
+    print(f'{C_RED}chatGPT4-reorganize: {PATH_TO_PREV_STEP} do not exist.{C_RED.OFF}')
 else:
     # cтворення директорії якщо не існує
     if not os.path.exists(PATH_TO_CURRENT_STEP):
@@ -35,7 +36,7 @@ else:
     # якщо є пости, запит на chatGPT через хандлер
     if prevPosts and len(prevPosts):
         print(
-            f'{C_GREEN}Starting the chatGPT-plagiarism... \n[Save directory: {PATH_TO_CURRENT_STEP}]\n[orig:{len(origPosts)}, prev step:{len(prevPosts) + len(donePosts)}, completed:{len(donePosts)}]{C_GREEN.OFF}\n---------')
+            f'{C_GREEN}Starting the chatGPT-reorganize... \n[Save directory: {PATH_TO_CURRENT_STEP}]\n[orig:{len(origPosts)}, prev step:{len(prevPosts) + len(donePosts)}, completed:{len(donePosts)}]{C_GREEN.OFF}\n---------')
         chatgpt = chatGPTHandler(*GPT_AUTH)
 
         for page in prevPosts:
@@ -43,12 +44,8 @@ else:
             with open(PATH_TO_PREV_STEP + page) as prevStepPageContent:
                 with open(PATH_TO_ORIGINAL + page) as originalContent:
                     print(f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
-                    # запит з 2 постами
-                    gptRequest = message + \
-                        "\nfirst post:\n" + \
-                        prevStepPageContent.read() + \
-                        "\nsecond post:\n" + \
-                        originalContent.read()
+                    # запит на chatgpt
+                    gptRequest = message + originalContent.read()
                     answer = chatgpt.interact(gptRequest)
 
                     # перевірка на ліміт
