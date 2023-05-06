@@ -5,7 +5,7 @@ from helpers.onlyAllowed import onlyAllowed
 counter = 0
 
 
-def createPost(title, postData, delay, stage=''):
+def createPost(title, postData, delay, stage='', changed=0):
     # створення назви статті
     if title:
         trimedTitleArr = map(str.lower, onlyAllowed(
@@ -22,5 +22,8 @@ def createPost(title, postData, delay, stage=''):
             global counter
             counter += 1
 
+        changedParagraphs = f' changed paragraphs: {changed},' if (
+            changed > 0) else ''
+
         print(f'{C_GREEN}Added post #{counter} to {C_GREEN.OFF}{C_BLUE}' + pathWithStage +
-              f'/{trimedTitle}.html{C_BLUE.OFF}, delay: {delay}s' + '\n--------------')
+              f'/{trimedTitle}.html{C_BLUE.OFF},{changedParagraphs} delay: {delay}s' + '\n--------------')

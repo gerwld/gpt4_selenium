@@ -1,10 +1,10 @@
 import os
 import time
 import random
-from improvers.handlers.gptHandler import Handler
+from improvers.handlers.gptHandler import chatGPTHandler
 from helpers.createPost import createPost
 from global_context import PATH_TO_POSTS, MD_SET_DATE, C_GREEN, MAX_PING_TRIES
-from improvers.handlers.auth import GPT_AUTH_TUPPLE
+from improvers.handlers.auth import GPT_AUTH
 
 message = "Finish the post down below, do not change post, just finish it:\n"
 
@@ -35,7 +35,7 @@ else:
 
     else:
         print(f'{C_GREEN}Founded {len(notFinishedPosts)} uncompleted posts out of {len(prevPosts)}. Starting...{C_GREEN.OFF}\n' + str(notFinishedPosts))
-        chatgpt = Handler(*GPT_AUTH_TUPPLE)
+        chatgpt = chatGPTHandler(*GPT_AUTH)
 
         for page in notFinishedPosts:
             delay = random.randint(2, 8)

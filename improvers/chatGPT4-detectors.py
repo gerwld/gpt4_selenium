@@ -7,10 +7,10 @@ from helpers.isPostValid import *
 from global_context import PATH_TO_POSTS, MD_SET_DATE, C_RED, MAX_PING_TRIES
 from improvers.handlers.auth import GPT_AUTH
 
-message = "change only code examples variables, variable titles, code comments, make them unique to avoid plagiarism, but keep the original text of article. change only code examples. If there is abstract example - like humans, cars, fruits - make them original too. most important - do not change main title and topic, even a symbol of it:\n"
+message = "Find last information how GPT model content is detected, and base on that rewrite the above content so that it is not detected as AI content by AI content detectors. Keep original structure and length:\n"
 
-MD_STEP_NAME = "_gpt_improved/"
-PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt/" + MD_SET_DATE + "/"
+MD_STEP_NAME = "_gpt_detection/"
+PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_improved/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 
@@ -33,8 +33,8 @@ else:
     # якщо є пости, запит на chatGPT через хандлер
     if prevPosts and len(prevPosts):
         print(
-            f'{C_GREEN}Starting the chatGPT-improve-2 [Save directory: {PATH_TO_CURRENT_STEP}]...{C_GREEN.OFF}')
-        chatgpt = chatGPTHandler(*GPT_AUTH)
+            f'{C_GREEN}Starting the chatGPT4-detectors [Save directory: {PATH_TO_CURRENT_STEP}]...{C_GREEN.OFF}')
+        chatgpt = chatGPTHandler(*GPT_AUTH, gpt4=True)
 
         for page in prevPosts:
             delay = random.randint(1, 3)

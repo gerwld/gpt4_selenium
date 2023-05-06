@@ -3,9 +3,9 @@ import time
 import random
 from helpers.createPost import *
 from helpers.isPostValid import *
-from improvers.handlers.gptHandler import Handler
+from improvers.handlers.gptHandler import chatGPTHandler
 from global_context import POSTS_TO_MD, PATH_TO_POSTS, MD_SET_DATE, C_GREEN, C_RED, MAX_PING_TRIES
-from improvers.handlers.auth import GPT_AUTH_TUPPLE
+from improvers.handlers.auth import GPT_AUTH
 
 message = "completely rephrase the post down below to avoid plagiarism, improve code examples, improve SEO, keep structure, logs example and tags: \n"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + "_gpt/" + MD_SET_DATE + "/"
@@ -28,7 +28,7 @@ else:
 
     # якщо є пости, запит на chatGPT через хандлер
     if htmlPosts and len(htmlPosts):
-        chatgpt = Handler(*GPT_AUTH_TUPPLE)
+        chatgpt = chatGPTHandler(*GPT_AUTH)
 
         for page in htmlPosts:
             delay = random.randint(1, 3)

@@ -2,14 +2,14 @@ import os
 import re
 import time
 import random
-from improvers.handlers.gptHandler import Handler
+from improvers.handlers.gptHandler import chatGPTHandler
 from helpers.createPost import *
 from helpers.isPostValid import *
 from global_context import PATH_TO_POSTS, MD_SET_DATE, C_RED, MAX_PING_TRIES
-from improvers.handlers.auth import GPT_AUTH_TUPPLE
+from improvers.handlers.auth import GPT_AUTH
 
-message_less = "2 posts, first post is have to be changed to be not plagiarism refer to the second post. don't use any of the text from the second post, use second post as a refer to rephrase simmilar phrases in the first post. Keep unique text as it is, return only first article:\n"
-message_more = "2 posts, first post is have to be changed to be not plagiarism refer to the second post. don't use any of the text from the second post, use second post as a refer to rephrase simmilar phrases in the first post. Keep unique text as it is, return only first article:\n"
+message_less = "if its possible - remove one most non informative paragraph from the post, but keep everything except it untouched, otherways return post as it is:\n"
+message_more = "add 1 - 2 more h2 to the post, add to each of them content under it, but keep everything except it untouched:\n"
 
 MD_STEP_NAME = "_gpt_paragraph/"
 PATH_TO_ORIGINAL = PATH_TO_POSTS + "/" + MD_SET_DATE + "/"
@@ -37,7 +37,7 @@ else:
     if prevPosts and len(prevPosts):
         print(
             f'{C_GREEN}Starting the chatGPT-paragraph... \n[Save directory: {PATH_TO_CURRENT_STEP}]\n[orig:{len(origPosts)}, prev step:{len(prevPosts) + len(donePosts)}, completed:{len(donePosts)}]{C_GREEN.OFF}\n---------')
-        chatgpt = Handler(*GPT_AUTH_TUPPLE)
+        chatgpt = chatGPTHandler(*GPT_AUTH)
 
         for page in prevPosts:
             delay = random.randint(1, 3)

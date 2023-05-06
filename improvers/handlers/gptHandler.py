@@ -1,3 +1,4 @@
+import sys
 import time
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -5,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 import selenium.common.exceptions as Exceptions
 
 
-class Handler:
+class chatGPTHandler:
     login_xq = '//button[//div[text()="Log in"]]'
     continue_xq = '//button[text()="Continue"]'
     next_cq = 'prose'
@@ -16,7 +17,8 @@ class Handler:
     reset_xq = '//a[text()="New chat"]'
 
     def __init__(self, username: str, password: str,
-                 headless: bool = True, cold_start: bool = False):
+                 headless: bool = False, cold_start: bool = False, gpt4=False):
+        self.gpt4 = gpt4
         options = uc.ChromeOptions()
         options.add_argument("--incognito")
 
@@ -105,8 +107,27 @@ class Handler:
         return
 
     def interact(self, question: str):
-        # self.browser.get("https://chat.openai.com/?model=gpt-4")
         """Function to get an answer for a question"""
+
+        # Set GPT-4 if enabled.
+        if self.gpt4:
+            print('-'*110 + '\nGPT-4 Version Enabled.\n' + '-'*110)
+            btn_set_gpt4_step_1 = self.browser.find_elements(
+                By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/button')
+            if len(btn_set_gpt4_step_1):
+                try:
+                    btn_set_gpt4_step_1[0].click()
+                    time.sleep(2)
+                    btn_set_gpt4_step_2 = self.browser.find_elements(
+                        By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/div/ul/li[3]')
+                    if len(btn_set_gpt4_step_2):
+                        btn_set_gpt4_step_2[0].click()
+                    else:
+                        sys.exit.__doc__
+
+                except Exceptions.ElementNotInteractableException:
+                    pass
+
         text_area = self.browser.find_element(By.TAG_NAME, 'textarea')
         for each_line in question.split("\n"):
             text_area.send_keys(each_line)
