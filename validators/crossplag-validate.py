@@ -8,7 +8,7 @@ from validators.handlers.crossplagHandler import CrossplagHandler
 from validators.handlers.auth import *
 
 MD_STEP_NAME = "_crossplag/"
-PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_detection/" + MD_SET_DATE + "/"
+PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_improve/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 
@@ -35,7 +35,7 @@ else:
         crossplag = CrossplagHandler(*CROSSPLAG_AUTH)
 
         for page in prevPosts:
-            delay = random.randint(1, 3)
+            delay = random.randint(1, 4)
             mdPageContent = ''
             with open(PATH_TO_PREV_STEP + page) as pageContent:
                 print(f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')

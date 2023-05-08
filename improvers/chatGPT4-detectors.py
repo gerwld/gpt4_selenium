@@ -2,7 +2,7 @@
 import os
 import time
 import random
-from improvers.handlers.gptHandler import chatGPTHandler
+from improvers.handlers.gptHandler import ChatGPTHandler
 from helpers.createPost import *
 from helpers.isPostValid import *
 from global_context import PATH_TO_POSTS, MD_SET_DATE, C_RED, MAX_PING_TRIES
@@ -35,10 +35,11 @@ else:
     if prevPosts and len(prevPosts):
         print(
             f'{C_GREEN}Starting the chatGPT4-detectors [Save directory: {PATH_TO_CURRENT_STEP}]...{C_GREEN.OFF}')
-        chatgpt = chatGPTHandler(*GPT_AUTH, gpt4=False)
+        chatgpt = ChatGPTHandler(
+            *GPT_AUTH, should_start_with="<article>")
 
         for page in prevPosts:
-            delay = random.randint(1, 3)
+            delay = random.randint(1, 4)
             mdPageContent = ''
             with open(PATH_TO_PREV_STEP + page) as pageContent:
                 print(f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
@@ -68,7 +69,7 @@ else:
                     time.sleep(1)
 
                 # перевірка відповіді на валідність
-                if isPostValid(answer):
+                if isPostValid(str(answer).strip()):
                     print(answer)
                     # створення поста зі стейджем
                     title = str(page).split('.')[0]

@@ -1,20 +1,24 @@
 import os
 from bs4 import BeautifulSoup
-from global_context import POSTS_TO_MD, TITLE_SELECTOR, MD_SET_DATE, MD_PROPS, MD_PREFIX, C_RED
+from global_context import TITLE_SELECTOR, MD_SET_DATE, MD_PROPS, MD_PREFIX, C_RED, PATH_TO_POSTS
 from helpers.trimText import titlecase
 from helpers.createMdPost import createMdPost
 
 
+MD_STEP_NAME = "_md/"
+PATH_TO_PREV_STEP = PATH_TO_POSTS + "_unsplash/" + MD_SET_DATE + "/"
+PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
+
 # отримання постів і прохід по ним, якщо існують
-if not os.path.exists(POSTS_TO_MD):
-    print(f'{C_RED}convertToMdPosts: {POSTS_TO_MD} do not exist.{C_RED.OFF}')
+if not os.path.exists(PATH_TO_PREV_STEP + '_unsplash'):
+    print(f'{C_RED}convertToMdPosts: {PATH_TO_PREV_STEP} do not exist.{C_RED.OFF}')
 else:
-    htmlPosts = os.listdir(os.path.dirname(POSTS_TO_MD))
+    htmlPosts = os.listdir(os.path.dirname(PATH_TO_PREV_STEP))
 
     if htmlPosts and len(htmlPosts):
         for page in htmlPosts:
             mdPageContent = ''
-            with open(POSTS_TO_MD + page) as pageContent:
+            with open(PATH_TO_PREV_STEP + page) as pageContent:
                 contentSoup = BeautifulSoup(pageContent, 'html5lib')
 
                 # (1) формування md по супу

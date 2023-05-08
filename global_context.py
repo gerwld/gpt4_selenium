@@ -5,7 +5,7 @@ from colorist import ColorRGB
 BASE_URL = 'https://linuxhint.com/'
 CURRENT_PROJECT = 'qian-wu-blog'
 
-PATH_TO_LINKS = './res/posts/links.txt'
+PATH_TO_LINKS = './res/links.txt'
 PATH_TO_POSTS = './res/posts'
 PATH_TO_MDPOSTS = './res/md_posts'
 

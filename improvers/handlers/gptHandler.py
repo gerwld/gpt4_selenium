@@ -1,15 +1,19 @@
 """Хандлить запити на chat.openai.io"""
 import sys
 import time
+import platform
+import pyperclip as pc
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import selenium.common.exceptions as Exceptions
+from global_context import C_GREEN, C_RED
 
 
-class chatGPTHandler:
+class ChatGPTHandler:
     login_xq = '//button[//div[text()="Log in"]]'
     continue_xq = '//button[text()="Continue"]'
+    stop_xq = '//button[text()="Stop generating"]'
     next_cq = 'prose'
     button_tq = 'button'
     done_xq = '//button[//div[text()="Done"]]'
@@ -18,8 +22,9 @@ class chatGPTHandler:
     reset_xq = '//a[text()="New chat"]'
 
     def __init__(self, username: str, password: str,
-                 headless: bool = False, cold_start: bool = False, gpt4=False):
+                 headless: bool = False, cold_start: bool = False, gpt4=False, should_start_with=False):
         self.gpt4 = gpt4
+        self.should_start_with = should_start_with
         options = uc.ChromeOptions()
         options.add_argument("--incognito")
 
@@ -130,11 +135,46 @@ class chatGPTHandler:
                     pass
 
         text_area = self.browser.find_element(By.TAG_NAME, 'textarea')
-        for each_line in question.split("\n"):
-            text_area.send_keys(each_line)
+        # for each_line in question.split("\n"):
+        #     text_area.click()
+        #     text_area.send_keys(each_line)
+        #     text_area.send_keys(Keys.SHIFT + Keys.ENTER)
+        # text_area.send_keys(Keys.RETURN)
+
+        # оновлена версія для швидшого вставлення question в text_area
+        time.sleep(1)
+        pc.copy(question)
+        print(
+            '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
+        os_base = platform.system()
+        if os_base == 'Darwin':
+            text_area.send_keys(Keys.COMMAND, 'v')
+        else:
+            text_area.send_keys(Keys.CONTROL, 'v')
+        # для додання рандому в процесс, щоб тяжче було задетектити автоматизацію
+        if (question != 'keep going'):
+            time.sleep(1)
             text_area.send_keys(Keys.SHIFT + Keys.ENTER)
+        time.sleep(2)
         text_area.send_keys(Keys.RETURN)
+
+        # перевірка на should_start_with
+        if (self.should_start_with) and question != 'keep going':
+            time.sleep(2)
+            check_answer = self.browser.find_elements(
+                By.CLASS_NAME, self.chatbox_cq)[-1]
+            if len(check_answer.text) > 4 and not check_answer.text.strip().startswith(self.should_start_with):
+                print(
+                    f'{C_RED}should_start_with exeption...{C_RED.OFF}\n{check_answer.text}')
+                # Click stop
+                stop_button = self.browser.find_elements(
+                    By.XPATH, self.stop_xq)
+                if len(stop_button):
+                    stop_button[0].click()
+                return ''
+
         self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
+
         answer = self.browser.find_elements(By.CLASS_NAME, self.chatbox_cq)[-1]
         return answer.text
 

@@ -6,7 +6,7 @@ from helpers.onlyAllowed import onlyAllowed
 counter = 0
 
 
-def createPost(title, postData, delay, stage='', changed=0):
+def createPost(title, postData, delay, stage='/', changed=0):
     # створення назви статті
     if title:
         trimedTitleArr = map(str.lower, onlyAllowed(
@@ -16,6 +16,10 @@ def createPost(title, postData, delay, stage='', changed=0):
     # якщо є назва - створити .html-пейджі
     if trimedTitle and len(trimedTitle):
         pathWithStage = PATH_TO_POSTS + stage + MD_SET_DATE
+
+        # cтворення директорії якщо не існує
+        if not os.path.exists(pathWithStage):
+            os.makedirs(pathWithStage, exist_ok=True)
 
         os.makedirs(os.path.dirname(pathWithStage), exist_ok=True)
         with open(pathWithStage + f'/{trimedTitle}.html', 'w+') as f:

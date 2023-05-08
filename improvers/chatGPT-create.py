@@ -4,11 +4,11 @@ import time
 import random
 from helpers.createPost import *
 from helpers.isPostValid import *
-from improvers.handlers.gptHandler import chatGPTHandler
+from improvers.handlers.gptHandler import ChatGPTHandler
 from global_context import POSTS_TO_MD, PATH_TO_POSTS, MD_SET_DATE, C_GREEN, C_RED, MAX_PING_TRIES
 from improvers.handlers.auth import GPT_AUTH
 
-message = "completely rephrase the post down below to avoid plagiarism, improve code examples, improve SEO, keep structure, logs example and tags: \n"
+message = "completely rephrase the post down below to avoid plagiarism, improve code examples, improve SEO, keep structure and tags: \n"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + "_gpt/" + MD_SET_DATE + "/"
 
 
@@ -29,10 +29,11 @@ else:
 
     # якщо є пости, запит на chatGPT через хандлер
     if htmlPosts and len(htmlPosts):
-        chatgpt = chatGPTHandler(*GPT_AUTH)
+        chatgpt = ChatGPTHandler(
+            *GPT_AUTH, should_start_with="<article>")
 
         for page in htmlPosts:
-            delay = random.randint(1, 3)
+            delay = random.randint(1, 4)
             mdPageContent = ''
             with open(POSTS_TO_MD + page) as pageContent:
                 print(f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
@@ -62,7 +63,7 @@ else:
                     time.sleep(1)
 
                 # перевірка відповіді на валідність
-                if isPostValid(answer):
+                if isPostValid(str(answer).strip()):
                     print(answer)
                     # створення поста зі стейджем
                     title = str(page).split('.')[0]

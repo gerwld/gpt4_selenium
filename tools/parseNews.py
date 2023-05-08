@@ -5,10 +5,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from helpers.filterValidLinks import filterValidLinks
 from global_context import PATH_TO_LINKS, PATH_TO_POSTS, DEL_TAGS, STRIP_TAGS, TITLE_SELECTOR, FETCH_NO_TAGS, DEL_CLASS, DEL_PHRASES
-from helpers.createPost import createPost
-from helpers.clearSoup import clearSoup
-from helpers.stripSoup import stripSoup
-from helpers.delTagsSoup import delTagsSoup
+from helpers.createPost import *
+from helpers.clearSoup import *
+from helpers.stripSoup import *
+from helpers.delTagsSoup import *
 from helpers.delPhrasesSoup import *
 
 
@@ -60,7 +60,7 @@ if uniqueLinks and len(uniqueLinks):
         strFinalPost = stripSoup(finalPost, STRIP_TAGS)
         delPhFinalPost = delPhrasesSoup(strFinalPost, DEL_PHRASES)
 
-        delay = random.randint(2, 8)
+        delay = random.randint(1, 4)
         createPost(postTitle, delPhFinalPost, delay)
         time.sleep(delay)
 

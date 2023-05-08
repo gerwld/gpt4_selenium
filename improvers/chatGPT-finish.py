@@ -2,7 +2,7 @@
 import os
 import time
 import random
-from improvers.handlers.gptHandler import chatGPTHandler
+from improvers.handlers.gptHandler import ChatGPTHandler
 from helpers.createPost import createPost
 from global_context import PATH_TO_POSTS, MD_SET_DATE, C_GREEN, C_RED, MAX_PING_TRIES
 from improvers.handlers.auth import GPT_AUTH
@@ -37,7 +37,8 @@ else:
 
     else:
         print(f'{C_GREEN}Founded {len(notFinishedPosts)} uncompleted posts out of {len(prevPosts)}. Starting...{C_GREEN.OFF}\n' + str(notFinishedPosts))
-        chatgpt = chatGPTHandler(*GPT_AUTH)
+        chatgpt = ChatGPTHandler(
+            *GPT_AUTH, should_start_with="<article>")
 
         for page in notFinishedPosts:
             delay = random.randint(2, 8)
