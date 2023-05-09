@@ -9,7 +9,7 @@ from global_context import PATH_TO_POSTS, MD_SET_DATE, C_RED, MAX_PING_TRIES
 from improvers.handlers.auth import GPT_AUTH
 
 
-message = "reorganize subheadings in post down below, improve subheadings titles SEO, keep them unique: \n"
+message = "improve subheadings titles SEO, slightly improve explanations. make it human-written and try to keep original words length: \n"
 
 MD_STEP_NAME = "_gpt_reorganize/"
 PATH_TO_ORIGINAL = PATH_TO_POSTS + "/" + MD_SET_DATE + "/"
@@ -48,11 +48,6 @@ else:
                     # запит на chatgpt
                     gptRequest = message + originalContent.read()
                     answer = chatgpt.interact(gptRequest)
-
-                    # перевірка на ліміт
-                    if "you've reached our limit of messages" in answer.lower():
-                        print('ChatGPT limit reached. Breaking the operation...')
-                        break
 
                     # пінгування щоб обійти ліміт і обрив генерації (0 щоб виключити)
                     break_words = ("sure", "i'm sorry",

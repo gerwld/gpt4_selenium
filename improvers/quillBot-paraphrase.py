@@ -10,7 +10,7 @@ from helpers.createPost import *
 from helpers.isPostValid import *
 
 MD_STEP_NAME = "_qb_paraphrase/"
-PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_reorganize/" + MD_SET_DATE + "/"
+PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_paragraphs/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 SKIP_PARAGRAPHS_WITH = ["{", "}"]
@@ -48,8 +48,8 @@ else:
                     if any([x in parText for x in SKIP_PARAGRAPHS_WITH]):
                         print(
                             f'{C_RED}Contains not allowed symbs, skipping:{C_RED.OFF}', parText)
-                    # шанс 80% / або перший параграф перевірка на довжину і забороненні символи, якщо все вірно то прохід по параграфу
-                    if (random.random() < 0.8 or phrasesChanged == 0) and par_length and not any([x in parText for x in SKIP_PARAGRAPHS_WITH]):
+                    # шанс 50% / або перший параграф перевірка на довжину і забороненні символи, якщо все вірно то прохід по параграфу
+                    if (random.random() < 0.5 or phrasesChanged == 0) and par_length and not any([x in parText for x in SKIP_PARAGRAPHS_WITH]):
                         newParagraph = quillBot.interact(paragraph=parText)
                         # якщо newParagraph і довжина його слів більше або хочаб дорівнює 70% оригіналу - заміни на неї
                         if newParagraph and len(newParagraph.split(' ')) >= len(str(p.get_text()).split(' ')) * 0.7:

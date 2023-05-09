@@ -8,7 +8,7 @@ from helpers.isPostValid import *
 from global_context import PATH_TO_POSTS, MD_SET_DATE, C_RED, MAX_PING_TRIES
 from improvers.handlers.auth import GPT_AUTH
 
-message = "Find last information how GPT model content is detected, and base on that rewrite the above content so that it is not detected as AI content by AI content detectors. Keep original structure and length:\n"
+message = "Find last information how GPT model content is detected, and base on that rewrite the above content so that it is not detected as AI content by AI content detectors. Keep original structure, tags and length:\n"
 
 MD_STEP_NAME = "_gpt_detectors/"
 PATH_TO_PREV_STEP = PATH_TO_POSTS + "_qb_paraphrase/" + MD_SET_DATE + "/"
@@ -51,20 +51,24 @@ else:
                     print('ChatGPT limit reached. Breaking the operation...')
                     break
 
-                # пінгування щоб обійти ліміт і обрив генерації (0 щоб виключити)
+               # пінгування щоб обійти ліміт і обрив генерації (0 щоб виключити)
                 break_words = ("sure", "i'm sorry",
                                "thats all", "that's all", 'what')
                 # тільки якщо починається з <article>, немає кінця </article> і не починається з break_words
-                maxPingTries = MAX_PING_TRIES
+                maxPingTries = MAX_PING_TRIES + 1
                 while maxPingTries > 0 and answer.strip().startswith('<article>') and not answer.strip().endswith('</article>') and not answer.strip().lower().startswith(break_words):
                     newAnswer = chatgpt.interact('keep going')
                     print(
-                        f"New request to fix layout, resp. ends with: {newAnswer[len(newAnswer) - 10 :]}")
-
+                        f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :]}")
+                    noSpacesAnswer = ''.join(
+                        str(answer + newAnswer).strip().split(' '))
                     if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
                         answer += newAnswer
                     elif newAnswer.strip().startswith('<article>'):
                         answer = newAnswer
+                    # якщо починається і закінчується на article
+                    elif noSpacesAnswer.startswith('<article>') and noSpacesAnswer.endswith('</article>'):
+                        answer += newAnswer
                     maxPingTries -= 1
                     time.sleep(1)
 

@@ -10,7 +10,8 @@ PATH_TO_PREV_STEP = PATH_TO_POSTS + "_unsplash/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 # отримання постів і прохід по ним, якщо існують
-if not os.path.exists(PATH_TO_PREV_STEP + '_unsplash'):
+print(PATH_TO_PREV_STEP)
+if not os.path.exists(PATH_TO_PREV_STEP):
     print(f'{C_RED}convertToMdPosts: {PATH_TO_PREV_STEP} do not exist.{C_RED.OFF}')
 else:
     htmlPosts = os.listdir(os.path.dirname(PATH_TO_PREV_STEP))
@@ -19,7 +20,7 @@ else:
         for page in htmlPosts:
             mdPageContent = ''
             with open(PATH_TO_PREV_STEP + page) as pageContent:
-                contentSoup = BeautifulSoup(pageContent, 'html5lib')
+                contentSoup = BeautifulSoup(pageContent.read(), 'html5lib')
 
                 # (1) формування md по супу
                 titleObj = contentSoup.find(TITLE_SELECTOR)
@@ -35,8 +36,8 @@ else:
                 mdPageContent += '---\n\n'
                 titleObj.extract()
 
-                # (3) формування контенту md (якщо приходить строка стетати її, інакше прохід по супу)
-                content = type(contentSoup) == str if contentSoup else contentSoup.find(
+                # (3) формування контенту md (якщо приходить строка сетати її, інакше прохід по супу)
+                content = contentSoup if type(contentSoup) == str else contentSoup.find(
                     'body').contents
                 for childs in content:
                     mdPageContent += str(childs)

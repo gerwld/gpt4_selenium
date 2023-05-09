@@ -43,8 +43,8 @@ else:
 
                 # запит на crossplag
                 validationResponce = crossplag.interact(post=content)
-                # якщо резульат менше 50% звалідуй і збережи, інакше виведи лог
-                if validationResponce < 50:
+                # якщо резульат менше 55% звалідуй і збережи, інакше виведи лог
+                if validationResponce < 55:
                     print(
                         f'{C_GREEN}Post validated: {page.split(".")[0]}, AI-percent: {validationResponce}%{C_GREEN.OFF}')
                     if isPostValid(content):

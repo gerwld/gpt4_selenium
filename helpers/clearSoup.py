@@ -17,4 +17,9 @@ def clearSoup(content):
 
     trimmedNoAmp = re.sub(
         r'\&amp; ', '', str(tNoSpacesAtTheBegining)).strip()
-    return trimmedNoAmp
+    trimmedNoBrokenTag = re.sub(
+        r'<<', '<', str(trimmedNoAmp)).strip()
+    trimmedNoBrokenTag2 = re.sub(
+        r'</<', '<', str(trimmedNoBrokenTag)).strip()
+
+    return trimmedNoBrokenTag2

@@ -13,8 +13,8 @@ from improvers.handlers.auth import GPT_AUTH
 count_less = random.randint(1, 2)
 count_more = random.randint(2, 3)
 
-message_less = f"remove {count_less} less informative subheading{'s' if count_less > 1 else ''} and it content from the post, keep everything exept it untouched:\n"
-message_more = f"add {count_more} more subheading{'s' if count_more > 1 else ''} with content, keep everything exept it untouched:\n"
+message_less = f"remove {count_less} less informative subheading{'s' if count_less > 1 else ''} and it content from the post, keep everything exept it untouched, keep original structure and tags:\n"
+message_more = f"add {count_more} more subheading{'s' if count_more > 1 else ''} with content, keep everything exept it untouched, keep original structure and tags:\n"
 
 MD_STEP_NAME = "_gpt_paragraphs/"
 PATH_TO_ORIGINAL = PATH_TO_POSTS + "/" + MD_SET_DATE + "/"
@@ -59,11 +59,11 @@ else:
                 gptRequest = message_more + post
                 if wordsInPost > 2500:
                     print(
-                        '-'*110 + f'\n{C_GREEN}Words is more than 2500. Removing 1-3 paragraphs. Total words count: {wordsInPost} \n{C_GREEN.OFF}' + '-'*110)
+                        '-'*90 + f'\n{C_GREEN}Words is more than 2500. Removing 1-3 paragraphs. Total words count: {wordsInPost} \n{C_GREEN.OFF}' + '-'*90)
                     gptRequest = message_less + post
                 else:
                     print(
-                        '-'*110 + f'\n{C_GREEN}Words is less than 2500. Adding 1-2 more. Total words count: {wordsInPost} \n{C_GREEN.OFF}' + '-'*110)
+                        '-'*90 + f'\n{C_GREEN}Words is less than 2500. Adding 1-2 more. Total words count: {wordsInPost} \n{C_GREEN.OFF}' + '-'*90)
 
                 # запит
                 answer = chatgpt.interact(gptRequest)
@@ -77,17 +77,22 @@ else:
                 break_words = ("sure", "i'm sorry",
                                "thats all", "that's all", 'what')
                 # тільки якщо починається з <article>, немає кінця </article> і не починається з break_words
-                maxPingTries = MAX_PING_TRIES
+                maxPingTries = MAX_PING_TRIES + 1
                 while maxPingTries > 0 and answer.strip().startswith('<article>') and not answer.strip().endswith('</article>') and not answer.strip().lower().startswith(break_words):
                     newAnswer = chatgpt.interact('keep going')
                     print(
                         f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :]}")
-
+                    noSpacesAnswer = ''.join(
+                        str(answer + newAnswer).strip().split(' '))
                     if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
                         answer += newAnswer
                     elif newAnswer.strip().startswith('<article>'):
                         answer = newAnswer
+                    # якщо починається і закінчується на article
+                    elif noSpacesAnswer.startswith('<article>') and noSpacesAnswer.endswith('</article>'):
+                        answer += newAnswer
                     maxPingTries -= 1
+
                     time.sleep(1)
 
                 # перевірка відповіді на валідність

@@ -40,12 +40,7 @@ else:
                 gptRequest = message + pageContent.read()
                 answer = chatgpt.interact(gptRequest)
 
-                # перевірка на ліміт
-                if "you've reached our limit of messages per hour" in answer.lower():
-                    print('ChatGPT limit reached. Breaking the operation...')
-                    break
-
-                # пінгування щоб обійти ліміт і обрив генерації (0 щоб виключити)
+               # пінгування щоб обійти ліміт і обрив генерації (0 щоб виключити)
                 break_words = ("sure", "i'm sorry",
                                "thats all", "that's all", 'what')
                 # тільки якщо починається з <article>, немає кінця </article> і не починається з break_words
@@ -53,12 +48,16 @@ else:
                 while maxPingTries > 0 and answer.strip().startswith('<article>') and not answer.strip().endswith('</article>') and not answer.strip().lower().startswith(break_words):
                     newAnswer = chatgpt.interact('keep going')
                     print(
-                        f"New request to fix layout, resp. ends with: {newAnswer[len(newAnswer) - 10 :]}")
-
+                        f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :]}")
+                    noSpacesAnswer = ''.join(
+                        str(answer + newAnswer).strip().split(' '))
                     if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
                         answer += newAnswer
                     elif newAnswer.strip().startswith('<article>'):
                         answer = newAnswer
+                    # якщо починається і закінчується на article
+                    elif noSpacesAnswer.startswith('<article>') and noSpacesAnswer.endswith('</article>'):
+                        answer += newAnswer
                     maxPingTries -= 1
                     time.sleep(1)
 

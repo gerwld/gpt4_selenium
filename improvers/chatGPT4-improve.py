@@ -5,10 +5,11 @@ import random
 from improvers.handlers.gptHandler import ChatGPTHandler
 from helpers.createPost import *
 from helpers.isPostValid import *
-from global_context import PATH_TO_POSTS, MD_SET_DATE, C_RED, MAX_PING_TRIES
+from global_context import PATH_TO_POSTS, MD_SET_DATE, C_RED
 from improvers.handlers.auth import GPT_AUTH
 
-message = "Find last information how GPT model content is detected, and base on that rewrite the above content so that it is not detected as AI content by AI content detectors. Keep original structure and length:\n"
+# message = "Find last information how GPT model content is detected, and base on that rewrite the above article so that it is not detected as AI content by AI content detectors. Also, make it more human-written, fix any mistakes in it, false info, and improve SEO, keep original structure and length:\n"
+message = "fix any mistakes in post, fix false info, make it more human-written, make better SEO, but keep original structure and tags response just with article:\n"
 
 MD_STEP_NAME = "_gpt_improve/"
 PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_detectors/" + MD_SET_DATE + "/"
@@ -34,15 +35,16 @@ else:
     # якщо є пости, запит на chatGPT через хандлер
     if prevPosts and len(prevPosts):
         print(
-            f'{C_GREEN}Starting the chatGPT4-detectors [Save directory: {PATH_TO_CURRENT_STEP}]...{C_GREEN.OFF}')
+            f'{C_GREEN}Starting the chatGPT4-improve [Save directory: {PATH_TO_CURRENT_STEP}]...{C_GREEN.OFF}')
         chatgpt = ChatGPTHandler(
-            *GPT_AUTH, should_start_with="<article>")
+            *GPT_AUTH, gpt4=False, should_start_with="<article>")
 
         for page in prevPosts:
             delay = random.randint(1, 4)
             mdPageContent = ''
             with open(PATH_TO_PREV_STEP + page) as pageContent:
-                print(f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
+                print(
+                    f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
                 gptRequest = message + pageContent.read()
                 answer = chatgpt.interact(gptRequest)
 
@@ -51,20 +53,30 @@ else:
                     print('ChatGPT limit reached. Breaking the operation...')
                     break
 
-                # пінгування щоб обійти ліміт і обрив генерації (0 щоб виключити)
+               # пінгування щоб обійти ліміт і обрив генерації (0 щоб виключити)
                 break_words = ("sure", "i'm sorry",
                                "thats all", "that's all", 'what')
                 # тільки якщо починається з <article>, немає кінця </article> і не починається з break_words
-                maxPingTries = MAX_PING_TRIES
+                maxPingTries = 3
                 while maxPingTries > 0 and answer.strip().startswith('<article>') and not answer.strip().endswith('</article>') and not answer.strip().lower().startswith(break_words):
-                    newAnswer = chatgpt.interact('keep going')
-                    print(
-                        f"New request to fix layout, resp. ends with: {newAnswer[len(newAnswer) - 10 :]}")
+                    newAnswer = chatgpt.interact(
+                        'keep going')
 
-                    if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
+                    print(
+                        f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :]}")
+                    noSpacesAnswer = ''.join(
+                        str(answer + newAnswer).strip().split(' '))
+                    if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>') and '</article>' not in newAnswer:
                         answer += newAnswer
                     elif newAnswer.strip().startswith('<article>'):
                         answer = newAnswer
+                    # якщо починається і закінчується на article
+                    elif noSpacesAnswer.startswith('<article>') and noSpacesAnswer.endswith('</article>'):
+                        answer += newAnswer
+                     # якщо починається і містить закриваючий article
+                    elif answer.strip().startswith('<article>') and '</article>' in newAnswer:
+                        answer += newAnswer.split("</article>")[
+                            0] + "</article>"
                     maxPingTries -= 1
                     time.sleep(1)
 

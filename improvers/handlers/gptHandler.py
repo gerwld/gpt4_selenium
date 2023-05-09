@@ -1,7 +1,7 @@
 """Хандлить запити на chat.openai.io"""
 import sys
 import time
-import platform
+import random
 import pyperclip as pc
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -30,6 +30,7 @@ class ChatGPTHandler:
 
         if headless:
             options.add_argument("--headless=new")
+            options.add_argument('--blink-settings=imagesEnabled=false')
 
         self.browser = uc.Chrome(options=options)
         self.browser.set_page_load_timeout(15)
@@ -74,7 +75,10 @@ class ChatGPTHandler:
 
         # Find password textbox, enter password
         pass_box = self.sleepy_find_element(By.ID, "password")
-        pass_box.send_keys(password)
+        if type(pass_box) == list and len(pass_box):
+            pass_box[0].send_keys(password)
+        else:
+            pass_box.send_keys(password)
         # Click continue
         continue_button = self.sleepy_find_element(By.XPATH, self.continue_xq)
         continue_button.click()
@@ -117,7 +121,7 @@ class ChatGPTHandler:
 
         # Set GPT-4 if enabled.
         if self.gpt4:
-            print('-'*110 + '\nGPT-4 Version Enabled.\n' + '-'*110)
+            print('-'*90 + '\nGPT-4 Version Enabled.\n' + '-'*90)
             btn_set_gpt4_step_1 = self.browser.find_elements(
                 By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/button')
             if len(btn_set_gpt4_step_1):
@@ -134,7 +138,7 @@ class ChatGPTHandler:
                 except Exceptions.ElementNotInteractableException:
                     pass
 
-        text_area = self.browser.find_element(By.TAG_NAME, 'textarea')
+        # стара версія
         # for each_line in question.split("\n"):
         #     text_area.click()
         #     text_area.send_keys(each_line)
@@ -142,40 +146,44 @@ class ChatGPTHandler:
         # text_area.send_keys(Keys.RETURN)
 
         # оновлена версія для швидшого вставлення question в text_area
-        time.sleep(1)
-        pc.copy(question)
+        text_area = self.sleepy_find_element(By.TAG_NAME, 'textarea')
         print(
             '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
-        os_base = platform.system()
-        if os_base == 'Darwin':
-            text_area.send_keys(Keys.COMMAND, 'v')
-        else:
-            text_area.send_keys(Keys.CONTROL, 'v')
-        # для додання рандому в процесс, щоб тяжче було задетектити автоматизацію
-        if (question != 'keep going'):
-            time.sleep(1)
-            text_area.send_keys(Keys.SHIFT + Keys.ENTER)
-        time.sleep(2)
+        pc.copy(question.strip())
+        cmd_ctrl = Keys.COMMAND if sys.platform == 'darwin' else Keys.CONTROL
+        text_area.send_keys(cmd_ctrl + 'v м')
+        # фікс кириллиці
+        if text_area.get_attribute("value").endswith('м'):
+            text_area.send_keys(Keys.BACKSPACE)
         text_area.send_keys(Keys.RETURN)
 
         # перевірка на should_start_with
         if (self.should_start_with) and question != 'keep going':
-            time.sleep(2)
-            check_answer = self.browser.find_elements(
-                By.CLASS_NAME, self.chatbox_cq)[-1]
-            if len(check_answer.text) > 4 and not check_answer.text.strip().startswith(self.should_start_with):
-                print(
-                    f'{C_RED}should_start_with exeption...{C_RED.OFF}\n{check_answer.text}')
-                # Click stop
-                stop_button = self.browser.find_elements(
-                    By.XPATH, self.stop_xq)
-                if len(stop_button):
-                    stop_button[0].click()
-                return ''
+            still_generating = self.browser.find_elements(
+                By.CLASS_NAME, self.wait_cq)
+            if len(still_generating):
+                time.sleep(2)
+                check_answer = self.browser.find_elements(
+                    By.CLASS_NAME, self.chatbox_cq)[-1]
+                # перевірка на ліміт в реалтаймі
+                self.check_limit_timeout(response=check_answer.text)
+
+                if len(check_answer.text.strip()) > 4 and not ''.join(check_answer.text.strip().split(' ')).startswith(self.should_start_with):
+                    print(
+                        f'{C_RED}should_start_with exeption...{C_RED.OFF}\n{check_answer.text}')
+                    # Click stop
+                    stop_button = self.browser.find_elements(
+                        By.XPATH, self.stop_xq)
+                    if len(stop_button):
+                        stop_button[0].click()
+                    return ''
 
         self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
-
         answer = self.browser.find_elements(By.CLASS_NAME, self.chatbox_cq)[-1]
+
+        # перевірка на ліміт по відповіді
+        self.check_limit_timeout(response=answer.text)
+        # повернення якщо не ліміт
         return answer.text
 
     def quit(self):
@@ -186,12 +194,14 @@ class ChatGPTHandler:
         """the conversation is refreshed"""
         self.browser.find_element(By.XPATH, self.reset_xq).click()
 
-#     import argparse
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("username")
-#     parser.add_argument("password")
-#     args = parser.parse_args()
+    def check_limit_timeout(self, response: str):
+        if self.gpt4 == True and "You've reached the current usage cap for GPT-4" in response.strip():
+            print(
+                f'{C_RED}ChatGPT-4 limit reached. Setting sleep to 1 hour...{C_RED.OFF}')
+            time.sleep(3600)
 
-#     chatgpt = Handler(args.username, args.password)
-#     result = chatgpt.interact("Hello, how are you today")
-#     print(result)
+        if ''.join(response.strip().split(' ')).lower().startswith('!'):
+            requests_delay = random.randint(8, 20)
+            print(
+                f'{C_RED}ChatGPT limit reached. Setting sleep to {requests_delay} minutes...{C_RED.OFF}')
+            time.sleep(720)

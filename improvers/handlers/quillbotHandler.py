@@ -57,7 +57,7 @@ class QuillbotHandler:
         submit_btn = self.browser.find_element(By.XPATH, self.submit_btn_xq)
         self.avoid_popups()
         submit_btn.click()
-        time.sleep(6)
+        time.sleep(4)
 
         # Find output and return result
         output_to = self.sleepy_find_element(
@@ -68,6 +68,7 @@ class QuillbotHandler:
 
     def login(self, username: str, password: str):
         """To enter system"""
+
         # Find email textbox, enter e-mail
         email_box = self.browser.find_element(By.ID, 'mui-3')
         email_box.send_keys(username)
@@ -80,39 +81,50 @@ class QuillbotHandler:
         # Click continue
         continue_button = self.sleepy_find_element(By.XPATH, self.continue_xq)
         self.avoid_popups()
+        self.avoid_popups()
         continue_button.click()
         time.sleep(1)
 
         self.browser.get('https://quillbot.com')
 
+        try:
+            fluent_btn = self.sleepy_find_element(
+                By.XPATH, self.fluent_btn_xq)
+            fluent_btn.click()
+        except:
+            pass
+
     def avoid_popups(self):
         """To avoid popups"""
+        script = 'document.styleSheets[0].insertRule("img, svg, .MuiModal-root, #onetrust-consent-sdk{display: none!important;}", 4 )'
+        self.browser.execute_script(script)
         try:
-            self.browser.find_elements(By.XPATH, self.fluent_btn_xq)[0].click()
-        except:
-            pass
-        try:
-            self.browser.find_elements(By.XPATH, self.close_ad_xq)[0].click()
-        except:
-            pass
-
-        try:
-            self.browser.find_elements(By.ID, 'onetrust-accept-btn-handler')
+            self.browser.find_elements(
+                By.XPATH, self.close_ad_xq)[0].click()
         except:
             pass
 
         try:
-            self.browser.find_elements(By.XPATH, self.close_ad2_xq)[0].click()
+            self.browser.find_elements(
+                By.ID, 'onetrust-accept-btn-handler')
         except:
             pass
 
         try:
-            self.browser.find_elements(By.XPATH, self.close_ad4_xq)[0].click()
+            self.browser.find_elements(
+                By.XPATH, self.close_ad2_xq)[0].click()
         except:
             pass
 
         try:
-            self.browser.find_elements(By.ID, self.cookies_btn_iq)[0].click()
+            self.browser.find_elements(
+                By.XPATH, self.close_ad4_xq)[0].click()
+        except:
+            pass
+
+        try:
+            self.browser.find_elements(
+                By.ID, self.cookies_btn_iq)[0].click()
         except:
             pass
 
