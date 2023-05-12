@@ -25,4 +25,4 @@ def createMdPost(set_date, title, postData, stage=''):
             counter += 1
 
         print(f'{C_GREEN}Converted post #{counter} to {C_GREEN.OFF}{C_BLUE}' + PATH_TO_MDPOSTS +
-              f'{trimedTitle}.md{C_BLUE.OFF}, delay: 0s' + '\n--------------')
+              f'/{trimedTitle}.md{C_BLUE.OFF}, delay: 0s' + '\n--------------')
