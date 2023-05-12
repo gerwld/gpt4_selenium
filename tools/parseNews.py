@@ -4,12 +4,15 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from helpers.filterValidLinks import filterValidLinks
-from global_context import PATH_TO_LINKS, PATH_TO_POSTS, DEL_TAGS, STRIP_TAGS, TITLE_SELECTOR, FETCH_NO_TAGS, DEL_CLASS, DEL_PHRASES
+from global_context import PATH_TO_LINKS, PATH_TO_POSTS, DEL_TAGS, STRIP_TAGS, TITLE_SELECTOR, FETCH_NO_TAGS, DEL_CLASS, DEL_PHRASES, C_RED
 from helpers.createPost import *
 from helpers.clearSoup import *
 from helpers.stripSoup import *
 from helpers.delTagsSoup import *
 from helpers.delPhrasesSoup import *
+from helpers.textFromHtml import *
+
+MIN_WORDS_LENGTH = 300
 
 
 # Ініціалізація сервісу, опшинів хедлес бравзеру
@@ -38,31 +41,53 @@ if uniqueLinks and len(uniqueLinks):
         browser.get(link)
         postHtml = browser.page_source
         postSoup = BeautifulSoup(
-            postHtml, 'html5lib').find(id="main")
-        print(f'Getting post from {link}')
-        postTitle = postSoup.find(
-            TITLE_SELECTOR).get_text()
+            postHtml, 'html5lib')
+        postContent = postSoup.find("div", class_="article-content")
+        if postContent:
+            postWordsLenth = len(
+                " ".join(postContent.findAll(string=True)).strip().split(' '))
 
-        # трімінг супа
-        for tag in DEL_TAGS:
-            for match in postSoup.find_all(tag):
-                match.decompose()
+            # перевірка на довжину по кількості слів, якщо менше MIN_WORDS_LENGTH - скіп
+            if postWordsLenth > MIN_WORDS_LENGTH:
+                if postSoup.find(TITLE_SELECTOR) and len(postSoup.find(TITLE_SELECTOR)):
+                    print(f'Getting post from {link}\n')
+                    print(
+                        f'Title: {postSoup.find(TITLE_SELECTOR).get_text().strip()}')
+                    postTitle = postSoup.find(
+                        TITLE_SELECTOR).get_text()
 
-        for tag in DEL_CLASS:
-            for match in postSoup.find_all(class_=tag):
-                match.decompose()
+                    # трімінг супа
+                    for tag in DEL_TAGS:
+                        for match in postContent.find_all(tag):
+                            match.decompose()
 
-        # трімінг супа в залежності чи залишити теги
-        clearedSoup = clearSoup(postSoup)
-        noTagedSoup = delTagsSoup(postSoup)
-        finalPost = (clearedSoup, noTagedSoup)[FETCH_NO_TAGS]
+                    for tag in DEL_CLASS:
+                        for match in postContent.find_all(class_=tag):
+                            match.decompose()
 
-        strFinalPost = stripSoup(finalPost, STRIP_TAGS)
-        delPhFinalPost = delPhrasesSoup(strFinalPost, DEL_PHRASES)
+                    # трімінг супа в залежності чи залишити теги
+                    clearedSoup = clearSoup(postContent)
+                    noTagedSoup = delTagsSoup(postContent)
+                    finalPost = (clearedSoup, noTagedSoup)[FETCH_NO_TAGS]
 
-        delay = random.randint(1, 4)
-        createPost(postTitle, delPhFinalPost, delay)
-        time.sleep(delay)
+                    strFinalPost = stripSoup(finalPost, STRIP_TAGS)
+                    delPhFinalPost = delPhrasesSoup(strFinalPost, DEL_PHRASES)
+                    delPhFinalPostWithSourceAndTitle = '<del><a href="' + \
+                        link + '"/>' + link + '</a></del>\n' + \
+                        f"<h1>{postSoup.find(TITLE_SELECTOR).get_text().strip()}</h1>" + \
+                        delPhFinalPost
+
+                    delay = random.randint(0, 3)
+                    createPost(
+                        postTitle, delPhFinalPostWithSourceAndTitle, delay)
+                    time.sleep(delay)
+                else:
+                    print(
+                        f'{C_RED}Broken title in post from {link}. Skipping...{C_RED.OFF}')
+
+            else:
+                print(
+                    f'{C_RED}Length is less than {MIN_WORDS_LENGTH} (has only: {postWordsLenth}) from {link}. Skipping...{C_RED.OFF}')
 
     print(PATH_TO_POSTS)
 

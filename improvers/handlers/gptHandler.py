@@ -82,7 +82,7 @@ class ChatGPTHandler:
         # Click continue
         continue_button = self.sleepy_find_element(By.XPATH, self.continue_xq)
         continue_button.click()
-        time.sleep(1)
+        time.sleep(3)
 
         # Pass introduction
         next_button = self.browser.find_element(By.CLASS_NAME, self.next_cq)
@@ -146,6 +146,7 @@ class ChatGPTHandler:
         # text_area.send_keys(Keys.RETURN)
 
         # оновлена версія для швидшого вставлення question в text_area
+        time.sleep(1)
         text_area = self.sleepy_find_element(By.TAG_NAME, 'textarea')
         print(
             '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)

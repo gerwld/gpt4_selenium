@@ -2,10 +2,9 @@
 import time
 from colorist import ColorRGB
 
-BASE_URL = 'https://linuxhint.com/'
 CURRENT_PROJECT = 'qian-wu-blog'
 
-PATH_TO_LINKS = './res/links.txt'
+PATH_TO_LINKS = './res/sitemaplinks/links.txt'
 PATH_TO_POSTS = './res/posts'
 PATH_TO_MDPOSTS = './res/md_posts'
 
@@ -38,8 +37,11 @@ DEL_PHRASES = [
 ]
 
 DEL_CLASS = [
-    "entry-meta",
-    "adthrive"
+    "field--name-node-author",
+    "field--name-node-post-date",
+    "bs-region--right",
+    "field--name-dynamic-token-fieldnode-author"
+    # "bs-region--top"
 ]
 
 DEL_TAGS = [
@@ -63,6 +65,7 @@ DEL_TAGS = [
 
 STRIP_TAGS = [
     "article",
+    "section",
     "header",
     "html",
     "head",

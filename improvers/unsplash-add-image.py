@@ -10,7 +10,7 @@ from helpers.createPost import *
 from helpers.isPostValid import *
 
 MD_STEP_NAME = "_unsplash/"
-PATH_TO_PREV_STEP = PATH_TO_POSTS + "_crossplag/" + MD_SET_DATE + "/"
+PATH_TO_PREV_STEP = PATH_TO_POSTS + "_gpt_improve/" + MD_SET_DATE + "/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + MD_STEP_NAME + MD_SET_DATE + "/"
 
 
