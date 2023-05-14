@@ -17,17 +17,13 @@ requiredHtml = browser.page_source
 
 # Парсінг всіх ссилок на пости
 soup = BeautifulSoup(requiredHtml, 'html5lib')
-
 parentDiv = soup.find(id="main-box-1")
 allLinksToArticles = parentDiv.select('.entry-title:has(a)')
 
 allLinksToArticlesInline = ''
-print(allLinksToArticles)
 for h2 in allLinksToArticles:
     link = h2.find('a')
-
     allLinksToArticlesInline += (link['href'] + '\n')
-
 
 # створення нового файлу з усіма лінками
 if allLinksToArticlesInline:

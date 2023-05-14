@@ -12,7 +12,7 @@ from helpers.delTagsSoup import *
 from helpers.delPhrasesSoup import *
 from helpers.textFromHtml import *
 
-MIN_WORDS_LENGTH = 300
+MIN_WORDS_LENGTH = 250
 
 
 # Ініціалізація сервісу, опшинів хедлес бравзеру
@@ -42,7 +42,7 @@ if uniqueLinks and len(uniqueLinks):
         postHtml = browser.page_source
         postSoup = BeautifulSoup(
             postHtml, 'html5lib')
-        postContent = postSoup.find("div", class_="article-content")
+        postContent = postSoup.find("article", class_="article-content")
         if postContent:
             postWordsLenth = len(
                 " ".join(postContent.findAll(string=True)).strip().split(' '))
@@ -50,13 +50,19 @@ if uniqueLinks and len(uniqueLinks):
             # перевірка на довжину по кількості слів, якщо менше MIN_WORDS_LENGTH - скіп
             if postWordsLenth > MIN_WORDS_LENGTH:
                 if postSoup.find(TITLE_SELECTOR) and len(postSoup.find(TITLE_SELECTOR)):
-                    print(f'Getting post from {link}\n')
-                    print(
-                        f'Title: {postSoup.find(TITLE_SELECTOR).get_text().strip()}')
                     postTitle = postSoup.find(
-                        TITLE_SELECTOR).get_text()
+                        TITLE_SELECTOR).get_text().strip()
+                    print(f'Getting post from {link}\n')
+                    print(f'Title: {postTitle}')
 
-                    # трімінг супа
+                    # якщо в контенті немає тайтлу але є в супі - додай в суп
+                    if not postContent.find(TITLE_SELECTOR):
+                        titleTag = postSoup.new_tag('h1')
+                        titleTag.string = postTitle
+                        postContent.p.insert_before(titleTag)
+                        print("Inserted title inside article.")
+
+                        # трімінг супа
                     for tag in DEL_TAGS:
                         for match in postContent.find_all(tag):
                             match.decompose()
@@ -72,14 +78,13 @@ if uniqueLinks and len(uniqueLinks):
 
                     strFinalPost = stripSoup(finalPost, STRIP_TAGS)
                     delPhFinalPost = delPhrasesSoup(strFinalPost, DEL_PHRASES)
-                    delPhFinalPostWithSourceAndTitle = '<del><a href="' + \
+                    delPhFinalPostWithSource = '<del><a href="' + \
                         link + '"/>' + link + '</a></del>\n' + \
-                        f"<h1>{postSoup.find(TITLE_SELECTOR).get_text().strip()}</h1>" + \
                         delPhFinalPost
 
                     delay = random.randint(0, 3)
                     createPost(
-                        postTitle, delPhFinalPostWithSourceAndTitle, delay)
+                        postTitle, delPhFinalPostWithSource, delay)
                     time.sleep(delay)
                 else:
                     print(
