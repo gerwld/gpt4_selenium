@@ -8,7 +8,7 @@ from helpers.onlyAllowed import onlyAllowed
 counter = 0
 
 
-def createPost(title, postData, delay, stage='/', changed=0):
+def createPost(title, postData, delay, stage='/', changed=0, isTimeout=True):
     # створення назви статті
     if title:
         trimedTitleArr = map(str.lower, onlyAllowed(
@@ -35,7 +35,7 @@ def createPost(title, postData, delay, stage='/', changed=0):
         print(f'{C_GREEN}Added post #{counter} to {C_GREEN.OFF}{C_BLUE}' + pathWithStage +
               f'/{trimedTitle}.html{C_BLUE.OFF},{changedParagraphs} delay: {delay}s' + '\n--------------')
 
-        if counter % 240 == 0:
+        if counter % 240 == 0 and isTimeout:
             timeout = random.randint(1, 6)
             print(
                 f'{C_RED}Setting timeout to {timeout} minutes, to avoid block by IP{C_RED.OFF}')
