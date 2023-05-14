@@ -19,7 +19,7 @@ POSTS_TO_MD = PATH_TO_POSTS + MD_PREFIX + "/" + MD_SET_DATE + "/"
 FETCH_NO_TAGS = False
 
 # ліміт по словам для фільтрації
-MIN_WORDS_LIMIT = 300
+MIN_WORDS_LIMIT = 250
 MAX_WORDS_LIMIT = 9000
 
 # скільки разів пінгувати при обриві відповіді chatGPT. Оптимально - від 2 до 4, щоб виключити 0
@@ -29,6 +29,17 @@ MAX_PING_TRIES = 3
 TITLE_SELECTOR = 'h1'
 
 DEL_PHRASES = [
+    "Thank you for reading this article.",
+    "Thank you for reading this article!",
+    "Thank you for reading this article!!",
+    "Thank you for reading this article",
+    "Thank you for reading this blog.",
+    "Thank you for reading this blog!",
+    "Thank you for reading this blog!!",
+    "Thank you for reading this blog",
+    "Thank you.",
+    "Thank you",
+    "Thank you.",
     "<p>Press&lt;Enter&gt;. </p>",
     "<p>Press Enter\&gt;. </p>",
     "<p>Press Enter&gt;. </p>",
@@ -37,21 +48,18 @@ DEL_PHRASES = [
 ]
 
 DEL_CLASS = [
-    "field--name-node-author",
-    "field--name-node-post-date",
-    "bs-region--right",
-    "field--name-dynamic-token-fieldnode-author"
-    # "bs-region--top"
+    "itemhead",
 ]
 
 DEL_TAGS = [
+    "h6",
+    "u",
     "script",
     "footer",
     "iframe",
     "img",
     "bloquote",
     "figure",
-    "a",
     "audio",
     "video",
     "svg",
@@ -64,6 +72,8 @@ DEL_TAGS = [
     "style"]
 
 STRIP_TAGS = [
+    "a",
+    "span",
     "article",
     "section",
     "header",
@@ -73,7 +83,7 @@ STRIP_TAGS = [
     "main",
     "div",
     "strong",
-    "span",
+    "tt",
     "i",]
 
 MD_PROPS = ['layout: post']
