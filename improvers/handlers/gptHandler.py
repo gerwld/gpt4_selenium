@@ -129,7 +129,7 @@ class ChatGPTHandler:
                     btn_set_gpt4_step_1[0].click()
                     time.sleep(2)
                     btn_set_gpt4_step_2 = self.browser.find_elements(
-                        By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/div/ul/li[3]')
+                        By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/div/ul/li[2]')
                     if len(btn_set_gpt4_step_2):
                         btn_set_gpt4_step_2[0].click()
                     else:
@@ -137,17 +137,18 @@ class ChatGPTHandler:
 
                 except Exceptions.ElementNotInteractableException:
                     pass
-
+        text_area = self.sleepy_find_element(By.TAG_NAME, 'textarea')
         # стара версія
         # for each_line in question.split("\n"):
         #     text_area.click()
         #     text_area.send_keys(each_line)
+        #     print(
+        #         '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
         #     text_area.send_keys(Keys.SHIFT + Keys.ENTER)
         # text_area.send_keys(Keys.RETURN)
 
         # оновлена версія для швидшого вставлення question в text_area
         time.sleep(1)
-        text_area = self.sleepy_find_element(By.TAG_NAME, 'textarea')
         print(
             '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
         pc.copy(question.strip())
@@ -201,8 +202,14 @@ class ChatGPTHandler:
                 f'{C_RED}ChatGPT-4 limit reached. Setting sleep to 1 hour...{C_RED.OFF}')
             time.sleep(3600)
 
-        if ''.join(response.strip().split(' ')).lower().startswith('!'):
+        if ''.join(response.strip().split(' ')).lower().startswith('!') and "reached our limit of messages per 24 hours." in response.strip():
+            requests_delay = random.randint(2, 16)
+            print(
+                f'{C_RED}ChatGPT 24h limit reached. Setting sleep to 1h {requests_delay} minutes...{C_RED.OFF}')
+            time.sleep(3600 + (requests_delay * 60))
+
+        if ''.join(response.strip().split(' ')).lower().startswith('!') and "reached" in response.strip():
             requests_delay = random.randint(8, 20)
             print(
                 f'{C_RED}ChatGPT limit reached. Setting sleep to {requests_delay} minutes...{C_RED.OFF}')
-            time.sleep(720)
+            time.sleep(requests_delay * 60)
