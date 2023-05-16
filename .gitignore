@@ -111,3 +111,6 @@ test.html
 
 .DS_Store
 sitemaps
+
+*.DS_Store
+/*.DS_Store
