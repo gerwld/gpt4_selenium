@@ -14,6 +14,7 @@ class ChatGPTHandler:
     login_xq = '//button[//div[text()="Log in"]]'
     continue_xq = '//button[text()="Continue"]'
     stop_xq = '//button[text()="Stop generating"]'
+    continue_gen_xq = '//*[@id="__next"]/div[2]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]'
     next_cq = 'prose'
     button_tq = 'button'
     done_xq = '//button[//div[text()="Done"]]'
@@ -146,6 +147,26 @@ class ChatGPTHandler:
         #         '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
         #     text_area.send_keys(Keys.SHIFT + Keys.ENTER)
         # text_area.send_keys(Keys.RETURN)
+
+        # перевірка на наявність кнопки Continue generating на запит keep going
+        if question.strip().lower() == "keep going":
+            print(f'{C_RED}Keep going exeption, Continue generating click{C_RED.OFF}')
+            time.sleep(1)
+            btn_continue_gen = self.browser.find_elements(
+                By.XPATH, self.continue_gen_xq)
+            if len(btn_continue_gen):
+                btn_continue_gen[0].click()
+                print(
+                    f'{C_RED}Keep going exeption, Continue generating click{C_RED.OFF}')
+
+                self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
+                answer = self.browser.find_elements(
+                    By.CLASS_NAME, self.chatbox_cq)[-1]
+
+                # перевірка на ліміт по відповіді
+                self.check_limit_timeout(response=answer.text)
+                # повернення якщо не ліміт
+                return answer.text
 
         # оновлена версія для швидшого вставлення question в text_area
         time.sleep(1)

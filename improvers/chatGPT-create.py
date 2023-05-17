@@ -57,7 +57,7 @@ else:
             with open(POSTS_TO_MD + page) as pageContent:
                 contentReaded = pageContent.read()
                 symbols_length = len(contentReaded)
-                if symbols_length < 9000:
+                if isPostValid(contentReaded.strip(), isReference=True):
                     print(f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
                     gptRequest = message + \
                         str(bs(contentReaded, 'html5lib').find(
