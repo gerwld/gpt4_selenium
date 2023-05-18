@@ -45,10 +45,16 @@ DEL_PHRASES = [
     "<p>Press Enter&gt;. </p>",
     "<p>Press&lt;Enter&gt;. </p>",
     "<p>Press\&lt;Enter\&gt;. </p>",
+    "<span>css</span>",
+    "<span>vbnet</span>"
+    "vbnet Copy code",
+    "css Copy code",
 ]
 
 DEL_CLASS = [
     "itemhead",
+    "ml-auto",
+
 ]
 
 DEL_TAGS = [

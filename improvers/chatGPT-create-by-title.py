@@ -6,8 +6,9 @@ from bs4 import BeautifulSoup as bs
 from helpers.createPost import *
 from helpers.isPostValid import *
 from helpers.transformTitleToFileName import *
+from helpers.delPhrasesSoup import *
 from improvers.handlers.gptHandler import ChatGPTHandler
-from global_context import PATH_TO_POSTS, MD_SET_DATE, C_GREEN, C_RED, MAX_PING_TRIES
+from global_context import PATH_TO_POSTS, MD_SET_DATE, C_GREEN, C_RED, DEL_CLASS, DEL_PHRASES
 from improvers.handlers.auth import GPT_AUTH
 
 
@@ -16,7 +17,7 @@ Created article should be informative, and have logical structure.\n\
 Created article should be created as human-written post, to avoid detection as AI content by AI content detectors.\n\
 Created article should be written in a style resembling human authorship, to avoid detection as AI-generated content by AI content detectors.\n\
 Avoid wrapping anything in triple backticks.\n\
-Created article should contain following html structure: be inside <article> tag, use <p> tag for paragraphs, and <h1> <h2> <h3> for titles.\n\
+Created article should contain following html structure: be inside <article> tag, use <p> tag for paragraphs, and <h1> <h2> <h3> for titles, <pre> and <code> for code samples.\n\
 \n\
 Article title: '
 
@@ -77,7 +78,16 @@ else:
                     print(answer)
                     # створення поста зі стейджем
                     title = transformTitleToFileName(title)
-                    createPost(title, answer, delay, "_gpt_bytitle/")
+                    postSoup = bs(answer, 'html5lib')
+                    # трімінг супа
+                    for tag in DEL_CLASS:
+                        for match in postSoup.find_all(class_=tag):
+                            match.decompose()
+                    # postSoup.find('body').name = 'article'
+                    delPhFinalPost = delPhrasesSoup(
+                        postSoup.find('article'), DEL_PHRASES)
+
+                    createPost(title, delPhFinalPost, delay, "_gpt_bytitle/")
 
                 else:
                     print(answer)

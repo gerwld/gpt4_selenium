@@ -62,7 +62,7 @@ if uniqueLinks and len(uniqueLinks):
                         postContent.p.insert_before(titleTag)
                         print("Inserted title inside article.")
 
-                        # трімінг супа
+                    # трімінг супа
                     for tag in DEL_TAGS:
                         for match in postContent.find_all(tag):
                             match.decompose()

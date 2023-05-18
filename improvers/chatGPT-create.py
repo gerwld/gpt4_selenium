@@ -5,11 +5,13 @@ import random
 from bs4 import BeautifulSoup as bs
 from helpers.createPost import *
 from helpers.isPostValid import *
+from helpers.transformTitleToFileName import *
+from helpers.delPhrasesSoup import *
 from improvers.handlers.gptHandler import ChatGPTHandler
-from global_context import POSTS_TO_MD, PATH_TO_POSTS, MD_SET_DATE, C_GREEN, C_RED, MAX_PING_TRIES
+from global_context import POSTS_TO_MD, PATH_TO_POSTS, MD_SET_DATE, C_GREEN, C_RED, MAX_PING_TRIES, DEL_CLASS, DEL_PHRASES
 from improvers.handlers.auth import GPT_AUTH
 
-message = "completely rephrase the post down below to avoid plagiarism, change the main topic, improve code examples, improve SEO, keep structure and tags: \n"
+message = "completely rephrase the post down below to avoid plagiarism, change the topic, improve code examples, improve SEO, keep structure and tags: \n"
 messageGPT4 = 'You are an AI article creation assistant named "PostMachine".\n\
 PostMachine MUST create a new post based on the original post to avoid any plagiarism.\n\
 PostMachine MUST answer only with an article inside the <article> tag.\n\
@@ -59,7 +61,7 @@ else:
                 symbols_length = len(contentReaded)
                 if isPostValid(contentReaded.strip(), isReference=True):
                     print(f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
-                    gptRequest = message + \
+                    gptRequest = messageGPT4 + \
                         str(bs(contentReaded, 'html5lib').find(
                             'article')).strip()
                     answer = chatgpt.interact(gptRequest)
@@ -90,12 +92,22 @@ else:
                         maxPingTries -= 1
                         time.sleep(1)
 
-                    # перевірка відповіді на валідність
+                      # перевірка відповіді на валідність
                     if isPostValid(str(answer).strip()):
                         print(answer)
                         # створення поста зі стейджем
                         title = str(page).split('.')[0]
-                        createPost(title, answer, delay, "_gpt/")
+                        postSoup = bs(answer, 'html5lib')
+                        # трімінг супа
+                        for tag in DEL_CLASS:
+                            for match in postSoup.find_all(class_=tag):
+                                match.decompose()
+                        # postSoup.find('body').name = 'article'
+                        delPhFinalPost = delPhrasesSoup(
+                            postSoup.find('article'), DEL_PHRASES)
+
+                        createPost(title, delPhFinalPost,
+                                   delay, "_gpt_bytitle/")
 
                     else:
                         print(answer)
@@ -106,7 +118,7 @@ else:
                     time.sleep(delay)
                 else:
                     print(
-                        f'{C_RED}Symbols_length > 9000 exeption. Total count: {symbols_length}')
+                        f'{C_RED}isPostValid reference exeption. Total count: {symbols_length}{C_RED.OFF}')
 
         # вихід з сессії
         chatgpt.quit()

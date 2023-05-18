@@ -7,7 +7,7 @@ def isPostValid(post, isReference=False):
         wordsCount = len(str(post).split(' ')) if post else 0
         print(f'wordsCount: {wordsCount}')
         if isReference:
-            return wordsCount > MIN_WORDS_LIMIT and wordsCount < MAX_WORDS_LIMIT and '<article>' in post.strip() and post.strip().endswith('</article>')
+            return wordsCount > MIN_WORDS_LIMIT and wordsCount < 1500 and '<article>' in post.strip() and post.strip().endswith('</article>')
 
         return wordsCount > MIN_WORDS_LIMIT and wordsCount < MAX_WORDS_LIMIT and post.strip().startswith('<article>') and post.strip().endswith('</article>')
     return False

@@ -21,6 +21,7 @@ class ChatGPTHandler:
     chatbox_cq = 'text-base'
     wait_cq = 'text-2xl'
     reset_xq = '//a[text()="New chat"]'
+    gpt4_btn_xq = '//*[@id="__next"]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/ul/li[2]/button'
 
     def __init__(self, username: str, password: str,
                  headless: bool = False, cold_start: bool = False, gpt4=False, should_start_with=False):
@@ -98,7 +99,7 @@ class ChatGPTHandler:
         done_button = next_button.find_elements(By.TAG_NAME, self.button_tq)[1]
         done_button.click()
 
-    def sleepy_find_element(self, by, query, attempt_count: int = 20, sleep_duration: int = 1):
+    def sleepy_find_element(self, by, query, attempt_count: int = 30, sleep_duration: int = 1):
         """If the loading time is a concern, this function helps"""
         for _ in range(attempt_count):
             item = self.browser.find_elements(by, query)
@@ -122,92 +123,99 @@ class ChatGPTHandler:
 
         # Set GPT-4 if enabled.
         if self.gpt4:
-            print('-'*90 + '\nGPT-4 Version Enabled.\n' + '-'*90)
-            btn_set_gpt4_step_1 = self.browser.find_elements(
-                By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/button')
-            if len(btn_set_gpt4_step_1):
-                try:
-                    btn_set_gpt4_step_1[0].click()
-                    time.sleep(2)
-                    btn_set_gpt4_step_2 = self.browser.find_elements(
-                        By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/div/ul/li[2]')
-                    if len(btn_set_gpt4_step_2):
-                        btn_set_gpt4_step_2[0].click()
-                    else:
-                        sys.exit.__doc__
-
-                except Exceptions.ElementNotInteractableException:
-                    pass
-        text_area = self.sleepy_find_element(By.TAG_NAME, 'textarea')
-        # стара версія
-        # for each_line in question.split("\n"):
-        #     text_area.click()
-        #     text_area.send_keys(each_line)
-        #     print(
-        #         '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
-        #     text_area.send_keys(Keys.SHIFT + Keys.ENTER)
-        # text_area.send_keys(Keys.RETURN)
-
-        # перевірка на наявність кнопки Continue generating на запит keep going
-        if question.strip().lower() == "keep going":
-            print(f'{C_RED}Keep going exeption, Continue generating click{C_RED.OFF}')
             time.sleep(1)
-            btn_continue_gen = self.browser.find_elements(
-                By.XPATH, self.continue_gen_xq)
-            if len(btn_continue_gen):
-                btn_continue_gen[0].click()
-                print(
-                    f'{C_RED}Keep going exeption, Continue generating click{C_RED.OFF}')
+            print('-'*90 + '\nGPT-4 Version Enabled.\n' + '-'*90)
+            btn_set_gpt4 = self.browser.find_elements(
+                By.XPATH, self.gpt4_btn_xq)
 
-                self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
-                answer = self.browser.find_elements(
-                    By.CLASS_NAME, self.chatbox_cq)[-1]
+            while not len(btn_set_gpt4) and not question == "keep going":
+                time.sleep(0.5)
+                btn_set_gpt4 = self.browser.find_elements(
+                    By.XPATH, self.gpt4_btn_xq)
+                print('Try to find btn gpt-4', btn_set_gpt4)
 
-                # перевірка на ліміт по відповіді
-                self.check_limit_timeout(response=answer.text)
-                # повернення якщо не ліміт
-                return answer.text
+            if not question == "keep going":
+                btn_set_gpt4[0].click()
+                time.sleep(1)
+            # try:
+            #     btn_set_gpt4_step_1[0].click()
+            #     time.sleep(1)
+            #     # btn_set_gpt4_step_2 = self.browser.find_elements(
+            #     #     By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/div/ul/li[2]')
+            #     # if len(btn_set_gpt4_step_2):
+            #     #     btn_set_gpt4_step_2[0].click()
+            # except:
+            #     sys.exit.__doc__
 
-        # оновлена версія для швидшого вставлення question в text_area
-        time.sleep(1)
-        print(
-            '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
-        pc.copy(question.strip())
-        cmd_ctrl = Keys.COMMAND if sys.platform == 'darwin' else Keys.CONTROL
-        text_area.send_keys(cmd_ctrl + 'v м')
-        # фікс кириллиці
-        if text_area.get_attribute("value").endswith('м'):
-            text_area.send_keys(Keys.BACKSPACE)
-        text_area.send_keys(Keys.RETURN)
+        text_area = self.sleepy_find_element(By.TAG_NAME, 'textarea')
+        btn_continue_gen = self.browser.find_elements(
+            By.XPATH, self.continue_gen_xq)
+        # перевірка на запит keep going, якщо є кнопка Continue generating генерни продовження, інакше скіп
+        if question == 'keep going' and btn_continue_gen and len(btn_continue_gen):
+            time.sleep(1)
+            print(f'{C_RED}Continue generating click{C_RED.OFF}')
+            btn_continue_gen[0].click()
+            time.sleep(15)
+            self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
 
-        # перевірка на should_start_with
-        if (self.should_start_with) and question != 'keep going':
-            still_generating = self.browser.find_elements(
-                By.CLASS_NAME, self.wait_cq)
-            if len(still_generating):
-                time.sleep(2)
-                check_answer = self.browser.find_elements(
-                    By.CLASS_NAME, self.chatbox_cq)[-1]
-                # перевірка на ліміт в реалтаймі
-                self.check_limit_timeout(response=check_answer.text)
+            answer = self.browser.find_elements(
+                By.CLASS_NAME, self.chatbox_cq)[-1]
 
-                if len(check_answer.text.strip()) > 4 and not ''.join(check_answer.text.strip().split(' ')).startswith(self.should_start_with):
-                    print(
-                        f'{C_RED}should_start_with exeption...{C_RED.OFF}\n{check_answer.text}')
-                    # Click stop
-                    stop_button = self.browser.find_elements(
-                        By.XPATH, self.stop_xq)
-                    if len(stop_button):
-                        stop_button[0].click()
-                    return ''
+            # перевірка на ліміт по відповіді
+            self.check_limit_timeout(response=answer.text)
+            # повернення якщо не ліміт
+            return answer.text
+        else:
+            # стара версія
+            # for each_line in question.split("\n"):
+            #     text_area.click()
+            #     text_area.send_keys(each_line)
+            #     print(
+            #         '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
+            #     text_area.send_keys(Keys.SHIFT + Keys.ENTER)
+            # text_area.send_keys(Keys.RETURN)
 
-        self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
-        answer = self.browser.find_elements(By.CLASS_NAME, self.chatbox_cq)[-1]
+            # оновлена версія для швидшого вставлення question в text_area
+            time.sleep(1)
+            print(
+                '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
+            pc.copy(question.strip())
+            cmd_ctrl = Keys.COMMAND if sys.platform == 'darwin' else Keys.CONTROL
+            text_area.send_keys(cmd_ctrl + 'v м')
+            # фікс кириллиці
+            if text_area.get_attribute("value").endswith('м'):
+                text_area.send_keys(Keys.BACKSPACE)
+            text_area.send_keys(Keys.RETURN)
 
-        # перевірка на ліміт по відповіді
-        self.check_limit_timeout(response=answer.text)
-        # повернення якщо не ліміт
-        return answer.text
+            # перевірка на should_start_with
+            if (self.should_start_with) and question != 'keep going':
+                still_generating = self.browser.find_elements(
+                    By.CLASS_NAME, self.wait_cq)
+                if len(still_generating):
+                    time.sleep(2)
+                    check_answer = self.browser.find_elements(
+                        By.CLASS_NAME, self.chatbox_cq)[-1]
+                    # перевірка на ліміт в реалтаймі
+                    self.check_limit_timeout(response=check_answer.text)
+
+                    if len(check_answer.text.strip()) > 4 and not ''.join(check_answer.text.strip().split(' ')).startswith(self.should_start_with):
+                        print(
+                            f'{C_RED}should_start_with exeption...{C_RED.OFF}\n{check_answer.text}')
+                        # Click stop
+                        stop_button = self.browser.find_elements(
+                            By.XPATH, self.stop_xq)
+                        if len(stop_button):
+                            stop_button[0].click()
+                        return ''
+
+            self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
+            answer = self.browser.find_elements(
+                By.CLASS_NAME, self.chatbox_cq)[-1]
+
+            # перевірка на ліміт по відповіді
+            self.check_limit_timeout(response=answer.text)
+            # повернення якщо не ліміт
+            return answer.text
 
     def quit(self):
         self.browser.quit()
@@ -234,3 +242,7 @@ class ChatGPTHandler:
             print(
                 f'{C_RED}ChatGPT limit reached. Setting sleep to {requests_delay} minutes...{C_RED.OFF}')
             time.sleep(requests_delay * 60)
+
+        if ''.join(response.strip().split(' ')).lower().startswith('!') and "ne minute." in response.strip().lower():
+            print(f'{C_RED}ne minute....{C_RED.OFF}')
+            return ''
