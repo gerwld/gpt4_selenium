@@ -14,13 +14,14 @@ class ChatGPTHandler:
     login_xq = '//button[//div[text()="Log in"]]'
     continue_xq = '//button[text()="Continue"]'
     stop_xq = '//button[text()="Stop generating"]'
-    continue_gen_xq = '//*[@id="__next"]/div[2]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]'
+
     next_cq = 'prose'
     button_tq = 'button'
     done_xq = '//button[//div[text()="Done"]]'
     chatbox_cq = 'text-base'
     wait_cq = 'text-2xl'
     reset_xq = '//a[text()="New chat"]'
+    continue_gen_xq = '//*[@id="__next"]/div[2]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]'
     gpt4_btn_xq = '//*[@id="__next"]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/ul/li[2]/button'
 
     def __init__(self, username: str, password: str,
@@ -118,7 +119,7 @@ class ChatGPTHandler:
             time.sleep(sleep_duration)
         return
 
-    def interact(self, question: str):
+    def interact(self, question: str, isForced=False):
         """Function to get an answer for a question"""
 
         # Set GPT-4 if enabled.
@@ -137,46 +138,14 @@ class ChatGPTHandler:
             if not question == "keep going":
                 btn_set_gpt4[0].click()
                 time.sleep(1)
-            # try:
-            #     btn_set_gpt4_step_1[0].click()
-            #     time.sleep(1)
-            #     # btn_set_gpt4_step_2 = self.browser.find_elements(
-            #     #     By.XPATH, '/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/div/ul/li[2]')
-            #     # if len(btn_set_gpt4_step_2):
-            #     #     btn_set_gpt4_step_2[0].click()
-            # except:
-            #     sys.exit.__doc__
 
-        text_area = self.sleepy_find_element(By.TAG_NAME, 'textarea')
-        btn_continue_gen = self.browser.find_elements(
-            By.XPATH, self.continue_gen_xq)
         # перевірка на запит keep going, якщо є кнопка Continue generating генерни продовження, інакше скіп
-        if question == 'keep going' and btn_continue_gen and len(btn_continue_gen):
-            time.sleep(1)
-            print(f'{C_RED}Continue generating click{C_RED.OFF}')
-            btn_continue_gen[0].click()
-            time.sleep(15)
-            self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
+        if question == 'keep going' and not isForced:
+            return self.continue_generating()
 
-            answer = self.browser.find_elements(
-                By.CLASS_NAME, self.chatbox_cq)[-1]
-
-            # перевірка на ліміт по відповіді
-            self.check_limit_timeout(response=answer.text)
-            # повернення якщо не ліміт
-            return answer.text
         else:
-            # стара версія
-            # for each_line in question.split("\n"):
-            #     text_area.click()
-            #     text_area.send_keys(each_line)
-            #     print(
-            #         '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
-            #     text_area.send_keys(Keys.SHIFT + Keys.ENTER)
-            # text_area.send_keys(Keys.RETURN)
-
+            text_area = self.sleepy_find_element(By.TAG_NAME, 'textarea')
             # оновлена версія для швидшого вставлення question в text_area
-            time.sleep(1)
             print(
                 '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
             pc.copy(question.strip())
@@ -189,10 +158,10 @@ class ChatGPTHandler:
 
             # перевірка на should_start_with
             if (self.should_start_with) and question != 'keep going':
+                time.sleep(2)
                 still_generating = self.browser.find_elements(
                     By.CLASS_NAME, self.wait_cq)
-                if len(still_generating):
-                    time.sleep(2)
+                if still_generating and len(still_generating):
                     check_answer = self.browser.find_elements(
                         By.CLASS_NAME, self.chatbox_cq)[-1]
                     # перевірка на ліміт в реалтаймі
@@ -212,14 +181,62 @@ class ChatGPTHandler:
             answer = self.browser.find_elements(
                 By.CLASS_NAME, self.chatbox_cq)[-1]
 
-            # перевірка на ліміт по відповіді
+            # перевірка на ліміт по відповіді і повернення якщо ні
             self.check_limit_timeout(response=answer.text)
-            # повернення якщо не ліміт
             return answer.text
+
+    def continue_generating(self):
+        # пошук кнопки keep generating, якщо найдеш за 30 спроб - натисни, інакше форс ітерактшн з текстовим keep going
+        btn_continue_gen = self.sleepy_find_element(
+            By.XPATH, self.continue_gen_xq, 30, 0.3)
+        if btn_continue_gen:
+            btn_continue_gen.click()
+            print(f'{C_RED}Continue generating click{C_RED.OFF}')
+            fin_answer = self.get_last_generated()
+            # перевірка на ліміт по відповіді і повернення якщо ні
+            if fin_answer:
+                self.check_limit_timeout(response=fin_answer)
+                return fin_answer if fin_answer else ' '
+            else:
+                return ' '
+
+        # перевірка чи генерує, якщо ні і закінчується на артікл - повернути, інакше в залежності від того чи є кнопка
+        else:
+            fin_answer = self.get_last_generated()
+            btn_continue_gen = self.sleepy_find_element(
+                By.XPATH, self.continue_gen_xq, 30, 0.3)
+            if fin_answer.strip().endswith('</article>'):
+                return fin_answer
+            elif not btn_continue_gen:
+                self.interact('keep going', isForced=True)
+                print(f'{C_RED}Forced keep going{C_RED.OFF}')
+            elif btn_continue_gen:
+                self.continue_generating()
 
     def quit(self):
         self.browser.quit()
         return
+
+    def get_last_generated(self):
+        DELAY_FIRST_GENERATION = 4
+        DELAY_BETWEEN_CHECKS = 4
+        # Затримка в 4 сек, далі перевірка чи новий стемп відповідний старому з затримкою в 4 сек. Якщо рівні - повернення відповіді.
+        isAnswerNotEqual = True
+        answer = ''
+        time.sleep(DELAY_FIRST_GENERATION)
+        while (isAnswerNotEqual):
+            ans_block = self.browser.find_elements(
+                By.CLASS_NAME, self.chatbox_cq)[-1]
+            newAnswer = ans_block.text
+            if newAnswer and newAnswer.strip().lower().endswith('</article>'):
+                return newAnswer
+            elif newAnswer and not answer == newAnswer:
+                answer = newAnswer
+            elif (newAnswer):
+                isAnswerNotEqual = False
+            time.sleep(DELAY_BETWEEN_CHECKS)
+        self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
+        return self.browser.find_elements(By.CLASS_NAME, self.chatbox_cq)[-1].text
 
     def reset_thread(self):
         """the conversation is refreshed"""
@@ -230,19 +247,19 @@ class ChatGPTHandler:
             print(
                 f'{C_RED}ChatGPT-4 limit reached. Setting sleep to 1 hour...{C_RED.OFF}')
             time.sleep(3600)
-
         if ''.join(response.strip().split(' ')).lower().startswith('!') and "reached our limit of messages per 24 hours." in response.strip():
             requests_delay = random.randint(2, 16)
             print(
                 f'{C_RED}ChatGPT 24h limit reached. Setting sleep to 1h {requests_delay} minutes...{C_RED.OFF}')
             time.sleep(3600 + (requests_delay * 60))
-
         if ''.join(response.strip().split(' ')).lower().startswith('!') and "reached" in response.strip():
             requests_delay = random.randint(8, 20)
             print(
                 f'{C_RED}ChatGPT limit reached. Setting sleep to {requests_delay} minutes...{C_RED.OFF}')
             time.sleep(requests_delay * 60)
-
         if ''.join(response.strip().split(' ')).lower().startswith('!') and "ne minute." in response.strip().lower():
             print(f'{C_RED}ne minute....{C_RED.OFF}')
             return ''
+        if ''.join(response.strip().split(' ')).lower().startswith('!') and "Only one message at a time" in response.strip().lower():
+            print(f'{C_RED}at a time....{C_RED.OFF}')
+            return ' '

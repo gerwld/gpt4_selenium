@@ -20,9 +20,9 @@ Avoid wrapping anything in triple backticks.\n\
 Created article should contain following html structure: be inside <article> tag, use <p> tag for paragraphs, and <h1> <h2> <h3> for titles, <pre> and <code> for code samples.\n\
 \n\
 Article title: '
-
+PREFIX = "_gpt_bytitle_gpt3/"
 PATH_TO_TILES = "./titles/titles.txt"
-PATH_TO_CURRENT_STEP = PATH_TO_POSTS + "_gpt_bytitle/" + MD_SET_DATE + "/"
+PATH_TO_CURRENT_STEP = PATH_TO_POSTS + PREFIX + MD_SET_DATE + "/"
 
 # отримання заголовків і прохід по ним, якщо існують
 if not os.path.exists(PATH_TO_TILES):
@@ -59,19 +59,22 @@ else:
                 maxPingTries = 3
                 while maxPingTries > 0 and answer and answer.strip().startswith('<article>') and not answer.strip().endswith('</article>') and not answer.strip().lower().startswith(break_words):
                     newAnswer = chatgpt.interact('keep going')
-                    print(
-                        f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :]}")
-                    noSpacesAnswer = ''.join(
-                        str(answer + newAnswer).strip().split(' '))
-                    if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
-                        answer += newAnswer
-                    elif newAnswer.strip().startswith('<article>'):
-                        answer = newAnswer
-                    # якщо починається і закінчується на article
-                    elif noSpacesAnswer.startswith('<article>') and noSpacesAnswer.endswith('</article>'):
-                        answer += newAnswer
-                    maxPingTries -= 1
-                    time.sleep(1)
+                    if isinstance(newAnswer, str) and len(newAnswer):
+                        print(
+                            f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :] if newAnswer else 'null'}")
+                        noSpacesAnswer = ''.join(
+                            str(answer + newAnswer).strip().split(' '))
+                        if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
+                            answer += newAnswer
+                        elif newAnswer.strip().startswith('<article>'):
+                            answer = newAnswer
+                        # якщо починається і закінчується на article
+                        elif noSpacesAnswer.startswith('<article>') and noSpacesAnswer.endswith('</article>'):
+                            answer += newAnswer
+                        maxPingTries -= 1
+                        time.sleep(1)
+                    else:
+                        maxPingTries -= 1
 
                 # перевірка відповіді на валідність
                 if isPostValid(str(answer).strip()):
@@ -87,7 +90,7 @@ else:
                     delPhFinalPost = delPhrasesSoup(
                         postSoup.find('article'), DEL_PHRASES)
 
-                    createPost(title, delPhFinalPost, delay, "_gpt_bytitle/")
+                    createPost(title, delPhFinalPost, delay, PREFIX)
 
                 else:
                     print(answer)

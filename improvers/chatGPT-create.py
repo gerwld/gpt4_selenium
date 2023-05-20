@@ -31,7 +31,8 @@ The total word count of the created article should be between 400 and 1200.\n\
 The created article must contain at least one of the following phrases: "In my opinion", "Based on", "I think", "I disagree", "I guess", "As we can see".\n\
 The created article must have a minimum of two h2 titles.\n\n'
 
-PATH_TO_CURRENT_STEP = PATH_TO_POSTS + "_gpt/" + MD_SET_DATE + "/"
+PREFIX = "_gpt/"
+PATH_TO_CURRENT_STEP = PATH_TO_POSTS + PREFIX + MD_SET_DATE + "/"
 
 # отримання постів і прохід по ним, якщо існують
 if not os.path.exists(POSTS_TO_MD):
@@ -73,24 +74,27 @@ else:
                     maxPingTries = 3
                     while maxPingTries > 0 and answer and answer.strip().startswith('<article>') and not answer.strip().endswith('</article>') and not answer.strip().lower().startswith(break_words):
                         newAnswer = chatgpt.interact('keep going')
-                        print(
-                            f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :]}")
-                        noSpacesAnswer = ''.join(
-                            str(answer + newAnswer).strip().split(' '))
-                        if newAnswer.strip().lower().startswith(break_words):
-                            answer = ''
-                            maxPingTries = 0
+                        if isinstance(newAnswer, str) and len(newAnswer):
                             print(
-                                f'{C_RED}Skipping by break_words: {page}...{C_RED.OFF}\n--------------')
-                        if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
-                            answer += newAnswer
-                        elif newAnswer.strip().startswith('<article>'):
-                            answer = newAnswer
-                        # якщо починається і закінчується на article
-                        elif noSpacesAnswer.startswith('<article>') and noSpacesAnswer.endswith('</article>'):
-                            answer += newAnswer
-                        maxPingTries -= 1
-                        time.sleep(1)
+                                f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :] if newAnswer else 'null'}")
+                            noSpacesAnswer = ''.join(
+                                str(answer + newAnswer).strip().split(' '))
+                            if newAnswer.strip().lower().startswith(break_words):
+                                answer = ''
+                                maxPingTries = 0
+                                print(
+                                    f'{C_RED}Skipping by break_words: {page}...{C_RED.OFF}\n--------------')
+                            if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
+                                answer += newAnswer
+                            elif newAnswer.strip().startswith('<article>'):
+                                answer = newAnswer
+                            # якщо починається і закінчується на article
+                            elif noSpacesAnswer.startswith('<article>') and noSpacesAnswer.endswith('</article>'):
+                                answer += newAnswer
+                            maxPingTries -= 1
+                            time.sleep(1)
+                        else:
+                            maxPingTries -= 1
 
                       # перевірка відповіді на валідність
                     if isPostValid(str(answer).strip()):
@@ -107,7 +111,7 @@ else:
                             postSoup.find('article'), DEL_PHRASES)
 
                         createPost(title, delPhFinalPost,
-                                   delay, "_gpt_bytitle/")
+                                   delay, PREFIX)
 
                     else:
                         print(answer)
