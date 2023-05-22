@@ -47,7 +47,7 @@ Article title: '
                 # якщо є заголовки, запит на chatGPT через хандлер
                 if titlesList and len(titlesList):
                     chatgpt = ChatGPTHandler(
-                        *GPT_AUTH, should_start_with="<article>", gpt4=True)
+                        *GPT_AUTH, should_start_with="<article>", gpt4=False)
 
                     for title in titlesList:
                         delay = random.randint(1, 2)

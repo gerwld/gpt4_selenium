@@ -2,7 +2,8 @@ import re
 
 
 def delPhrasesSoup(soup, phrases):
-    res = soup
+    res = str(soup)
     for phrase in phrases:
-        res = str(res).replace(phrase, ' ').strip()
+        ed_res = re.sub(phrase, " ", res)
+        res = ed_res
     return res

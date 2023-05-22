@@ -23,6 +23,7 @@ class ChatGPTHandler:
     reset_xq = '//a[text()="New chat"]'
     continue_gen_xq = '//*[@id="__next"]/div[2]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]'
     gpt4_btn_xq = '//*[@id="__next"]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/ul/li[2]/button'
+    gpt_version_div = '/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div/div[1]'
 
     def __init__(self, username: str, password: str,
                  headless: bool = False, cold_start: bool = False, gpt4=False, should_start_with=False):
@@ -126,25 +127,41 @@ class ChatGPTHandler:
         if self.gpt4:
             time.sleep(1)
             print('-'*90 + '\nGPT-4 Version Enabled.\n' + '-'*90)
-            btn_set_gpt4 = self.browser.find_elements(
+            btn_set_gpt4 = self.sleepy_find_element(
                 By.XPATH, self.gpt4_btn_xq)
 
-            while not len(btn_set_gpt4) and not question == "keep going":
+            while not btn_set_gpt4 and not question == "keep going":
                 time.sleep(0.5)
-                btn_set_gpt4 = self.browser.find_elements(
+                btn_set_gpt4 = self.sleepy_find_element(
                     By.XPATH, self.gpt4_btn_xq)
                 print('Try to find btn gpt-4', btn_set_gpt4)
 
             if not question == "keep going":
-                btn_set_gpt4[0].click()
+                btn_set_gpt4.click()
+                time.sleep(0.2)
+                btn_set_gpt4.click()
+                time.sleep(0.2)
+                btn_set_gpt4.click()
+                time.sleep(0.2)
+                btn_set_gpt4.click()
+                time.sleep(0.2)
+                btn_set_gpt4.click()
                 time.sleep(1)
+            gpt_version = self.sleepy_find_element(
+                By.XPATH, self.gpt_version_div)
+            if (gpt_version and gpt_version.text and "GPT-4" in gpt_version.text):
+                print(f'{C_GREEN}Finded GPT-4 btn.{C_GREEN.OFF}')
+            else:
+                print(f'{C_RED}Not a GPT-4. Skipping...{C_RED.OFF}')
+                return 'not a GPT-4'
 
-        # перевірка на запит keep going, якщо є кнопка Continue generating генерни продовження, інакше скіп
+                # перевірка на запит keep going, якщо є кнопка Continue generating генерни продовження, інакше скіп
         if question == 'keep going' and not isForced:
             return self.continue_generating()
 
         else:
-            text_area = self.sleepy_find_element(By.TAG_NAME, 'textarea')
+            text_area = self.sleepy_find_element(
+                By.TAG_NAME, 'textarea', 40, 1)
             # оновлена версія для швидшого вставлення question в text_area
             print(
                 '-'*90 + f'\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n' + '-'*90)
@@ -191,6 +208,13 @@ class ChatGPTHandler:
             By.XPATH, self.continue_gen_xq, 30, 0.3)
         if btn_continue_gen:
             btn_continue_gen.click()
+            try:
+                btn_continue_gen.click()
+                time.sleep(1)
+                btn_continue_gen.click()
+            except:
+                pass
+
             print(f'{C_RED}Continue generating click{C_RED.OFF}')
             fin_answer = self.get_last_generated()
             # перевірка на ліміт по відповіді і повернення якщо ні
@@ -252,7 +276,7 @@ class ChatGPTHandler:
             print(
                 f'{C_RED}ChatGPT 24h limit reached. Setting sleep to 1h {requests_delay} minutes...{C_RED.OFF}')
             time.sleep(3600 + (requests_delay * 60))
-        if ''.join(response.strip().split(' ')).lower().startswith('!') and "reached" in response.strip():
+        if ''.join(response.strip().split(' ')).lower().startswith('!') and "limit reached" in response.strip():
             requests_delay = random.randint(8, 20)
             print(
                 f'{C_RED}ChatGPT limit reached. Setting sleep to {requests_delay} minutes...{C_RED.OFF}')

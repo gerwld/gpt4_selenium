@@ -46,9 +46,32 @@ DEL_PHRASES = [
     "<p>Press&lt;Enter&gt;. </p>",
     "<p>Press\&lt;Enter\&gt;. </p>",
     "<span>css</span>",
-    "<span>vbnet</span>"
+    "<span>vbnet</span>",
+    "Happy coding!",
+
     "vbnet Copy code",
     "css Copy code",
+    "less Copy code",
+    "python Copy code",
+    "javascript Copy code",
+    "php Copy code",
+    "vbnet Copy code",
+
+    "vbnet\nCopy code",
+    "css\nCopy code",
+    "less\nCopy code",
+    "python\nCopy code",
+    "javascript\nCopy code",
+    "php\nCopy code",
+    "vbnet\nCopy code",
+
+    "vbnet\n Copy code",
+    "css\n Copy code",
+    "less\n Copy code",
+    "python\n Copy code",
+    "javascript\n Copy code",
+    "php\n Copy code",
+    "vbnet\n Copy code",
 ]
 
 DEL_CLASS = [
