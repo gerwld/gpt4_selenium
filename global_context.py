@@ -12,7 +12,8 @@ PATH_TO_MDPOSTS = './res/md_posts'
 MD_PREFIX = ''
 
 # звідки брати пости для трансформації в markdown, яку дату сетати їм, куди зберігати
-MD_SET_DATE = time.strftime("%Y-%m-%d")
+# MD_SET_DATE = time.strftime("%Y-%m-%d")
+MD_SET_DATE = '2023-05-21'
 POSTS_TO_MD = PATH_TO_POSTS + MD_PREFIX + "/" + MD_SET_DATE + "/"
 
 # чи фетчити без тегів

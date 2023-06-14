@@ -35,103 +35,103 @@ PREFIX = "_gpt/"
 PATH_TO_CURRENT_STEP = PATH_TO_POSTS + PREFIX + MD_SET_DATE + "/"
 
 while True:
-    try:
-        # отримання постів і прохід по ним, якщо існують
-        if not os.path.exists(POSTS_TO_MD):
-            print(f'{C_RED}chatGPT-create: {POSTS_TO_MD} do not exist.{C_RED.OFF}')
-        else:
-            # cтворення нової директорії PATH_TO_CURRENT_STEP якщо не існує
-            os.makedirs(os.path.dirname(PATH_TO_CURRENT_STEP), exist_ok=True)
-            # перевірка наявності пройдених постів і фільтрація їх з основного масиву
-            htmlPosts = os.listdir(os.path.dirname(POSTS_TO_MD))
-            donePosts = os.listdir(os.path.dirname(PATH_TO_CURRENT_STEP))
-            if len(donePosts):
-                print(
-                    f'Founded {len(donePosts)} completed posts out of {len(htmlPosts)}. Skipping them...')
-                htmlPosts = list(
-                    filter(lambda x: x not in donePosts and x and x.endswith('.html'), htmlPosts))
+    # try:
+    # отримання постів і прохід по ним, якщо існують
+    if not os.path.exists(POSTS_TO_MD):
+        print(f'{C_RED}chatGPT-create: {POSTS_TO_MD} do not exist.{C_RED.OFF}')
+    else:
+        # cтворення нової директорії PATH_TO_CURRENT_STEP якщо не існує
+        os.makedirs(os.path.dirname(PATH_TO_CURRENT_STEP), exist_ok=True)
+        # перевірка наявності пройдених постів і фільтрація їх з основного масиву
+        htmlPosts = os.listdir(os.path.dirname(POSTS_TO_MD))
+        donePosts = os.listdir(os.path.dirname(PATH_TO_CURRENT_STEP))
+        if len(donePosts):
+            print(
+                f'Founded {len(donePosts)} completed posts out of {len(htmlPosts)}. Skipping them...')
+            htmlPosts = list(
+                filter(lambda x: x not in donePosts and x and x.endswith('.html'), htmlPosts))
 
-            # якщо є пости, запит на chatGPT через хандлер
-            if htmlPosts and len(htmlPosts):
-                chatgpt = ChatGPTHandler(
-                    *GPT_AUTH, should_start_with="<article>", gpt4=False)
+        # якщо є пости, запит на chatGPT через хандлер
+        if htmlPosts and len(htmlPosts):
+            chatgpt = ChatGPTHandler(
+                *GPT_AUTH, should_start_with="<article>", gpt4=False)
 
-                for page in htmlPosts:
-                    delay = random.randint(1, 4)
-                    mdPageContent = ''
-                    with open(POSTS_TO_MD + page) as pageContent:
-                        contentReaded = pageContent.read()
-                        symbols_length = len(contentReaded)
-                        if isPostValid(contentReaded.strip(), isReference=True):
-                            print(
-                                f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
-                            gptRequest = messageGPT4 + \
-                                str(bs(contentReaded, 'html5lib').find(
-                                    'article')).strip()
-                            answer = chatgpt.interact(gptRequest)
+            for page in htmlPosts:
+                delay = random.randint(1, 4)
+                mdPageContent = ''
+                with open(POSTS_TO_MD + page) as pageContent:
+                    contentReaded = pageContent.read()
+                    symbols_length = len(contentReaded)
+                    if isPostValid(contentReaded.strip(), isReference=True):
+                        print(
+                            f'{C_GREEN}Working with: {page}...{C_GREEN.OFF}')
+                        gptRequest = messageGPT4 + \
+                            str(bs(contentReaded, 'html5lib').find(
+                                'article')).strip()
+                        answer = chatgpt.interact(gptRequest)
 
-                        # пінгування щоб обійти ліміт і обрив генерації (0 щоб виключити)
-                            break_words = ("sure", "i'm sorry",
-                                           "thats all", "that's all", 'what', 'i apologize')
-                            # тільки якщо починається з <article>, немає кінця </article> і не починається з break_words
-                            maxPingTries = 3
-                            while maxPingTries > 0 and answer and answer.strip().startswith('<article>') and not answer.strip().endswith('</article>') and not answer.strip().lower().startswith(break_words):
-                                newAnswer = chatgpt.interact('keep going')
-                                if isinstance(newAnswer, str) and len(newAnswer):
-                                    print(
-                                        f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :] if newAnswer else 'null'}")
-                                    noSpacesAnswer = ''.join(
-                                        str(answer + newAnswer).strip().split(' '))
-                                    if newAnswer.strip().lower().startswith(break_words):
-                                        answer = ''
-                                        maxPingTries = 0
-                                        print(
-                                            f'{C_RED}Skipping by break_words: {page}...{C_RED.OFF}\n--------------')
-                                    if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
-                                        answer += newAnswer
-                                    elif newAnswer.strip().startswith('<article>'):
-                                        answer = newAnswer
-                                    # якщо починається і закінчується на article
-                                    elif noSpacesAnswer.startswith('<article>') and noSpacesAnswer.endswith('</article>'):
-                                        answer += newAnswer
-                                    maxPingTries -= 1
-                                    time.sleep(1)
-                                else:
-                                    maxPingTries -= 1
-
-                            # перевірка відповіді на валідність
-                            if isPostValid(str(answer).strip()):
-                                print(answer)
-                                # створення поста зі стейджем
-                                title = str(page).split('.')[0]
-                                postSoup = bs(answer, 'html5lib')
-                                # трімінг супа
-                                for tag in DEL_CLASS:
-                                    for match in postSoup.find_all(class_=tag):
-                                        match.decompose()
-                                # postSoup.find('body').name = 'article'
-                                delPhFinalPost = delPhrasesSoup(
-                                    postSoup.find('article'), DEL_PHRASES)
-
-                                createPost(title, delPhFinalPost,
-                                           delay, PREFIX)
-
-                            else:
-                                print(answer)
+                    # пінгування щоб обійти ліміт і обрив генерації (0 щоб виключити)
+                        break_words = ("sure", "i'm sorry",
+                                       "thats all", "that's all", 'what', 'i apologize')
+                        # тільки якщо починається з <article>, немає кінця </article> і не починається з break_words
+                        maxPingTries = 3
+                        while maxPingTries > 0 and answer and answer.strip().startswith('<article>') and not answer.strip().endswith('</article>') and not answer.strip().lower().startswith(break_words):
+                            newAnswer = chatgpt.interact('keep going')
+                            if isinstance(newAnswer, str) and len(newAnswer):
                                 print(
-                                    f'{C_RED}Skipping: {page}...{C_RED.OFF}\n--------------')
+                                    f"{C_GREEN}New request to fix layout, resp. ends with:{C_GREEN.OFF} {newAnswer[len(newAnswer) - 10 :] if newAnswer else 'null'}")
+                                noSpacesAnswer = ''.join(
+                                    str(answer + newAnswer).strip().split(' '))
+                                if newAnswer.strip().lower().startswith(break_words):
+                                    answer = ''
+                                    maxPingTries = 0
+                                    print(
+                                        f'{C_RED}Skipping by break_words: {page}...{C_RED.OFF}\n--------------')
+                                if answer.strip().startswith('<article>') and not newAnswer.strip().startswith('<article>'):
+                                    answer += newAnswer
+                                elif newAnswer.strip().startswith('<article>'):
+                                    answer = newAnswer
+                                # якщо починається і закінчується на article
+                                elif noSpacesAnswer.startswith('<article>') and noSpacesAnswer.endswith('</article>'):
+                                    answer += newAnswer
+                                maxPingTries -= 1
+                                time.sleep(1)
+                            else:
+                                maxPingTries -= 1
 
-                            chatgpt.reset_thread()
-                            time.sleep(delay)
+                        # перевірка відповіді на валідність
+                        if isPostValid(str(answer).strip()):
+                            print(answer)
+                            # створення поста зі стейджем
+                            title = str(page).split('.')[0]
+                            postSoup = bs(answer, 'html5lib')
+                            # трімінг супа
+                            for tag in DEL_CLASS:
+                                for match in postSoup.find_all(class_=tag):
+                                    match.decompose()
+                            # postSoup.find('body').name = 'article'
+                            delPhFinalPost = delPhrasesSoup(
+                                postSoup.find('article'), DEL_PHRASES)
+
+                            createPost(title, delPhFinalPost,
+                                       delay, PREFIX)
+
                         else:
+                            print(answer)
                             print(
-                                f'{C_RED}isPostValid reference exeption. Total count: {symbols_length}{C_RED.OFF}')
+                                f'{C_RED}Skipping: {page}...{C_RED.OFF}\n--------------')
 
-                # вихід з сессії
-                chatgpt.quit()
-    except (KeyboardInterrupt):
-        print('Stopping task...')
-        raise
-    except:
-        print(f'{C_RED}Re-opening task...{C_RED.OFF}')
-        pass
+                        chatgpt.reset_thread()
+                        time.sleep(delay)
+                    else:
+                        print(
+                            f'{C_RED}isPostValid reference exeption. Total count: {symbols_length}{C_RED.OFF}')
+
+            # вихід з сессії
+            chatgpt.quit()
+    # except (KeyboardInterrupt):
+    #     print('Stopping task...')
+    #     raise
+    # except:
+    #     print(f'{C_RED}Re-opening task...{C_RED.OFF}')
+    #     pass
