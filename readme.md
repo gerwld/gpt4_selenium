@@ -1,7 +1,7 @@
 # Init project:
 
 1. Clone repository
-2. Run
+2. Run:
 
 ```
 pip: -r requirements.txt
@@ -15,13 +15,13 @@ pip: -r requirements.txt
 python -m tools.getlinks
 ```
 
-### parseNews
+### parseNews:
 
 ```
 python -m tools.parseNews
 ```
 
-### convertToMdPosts
+### convertToMdPosts:
 
 ```
 python -m tools.convertToMdPosts
