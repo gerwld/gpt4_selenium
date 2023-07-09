@@ -2,6 +2,9 @@
 
 This project is primarily aimed at developing a bot that utilizes GPT-4 "as it is", with automatization and without using OpenAI API, which is significantly more expensive than $25. Currently it may not be "perfectly shaped", so if you wan't to make some improvements feel free to do it and sumbit pull request. (However, please understand that I may not accept changes that are not beneficial).
 
+![photo_2023-07-10 00 08 23](https://github.com/gerwld/gpt4_selenium/assets/47056812/91aecf98-d9a9-4a9e-99ac-96536e47c064)
+
+
 ## What is working, basically:
 - It may be used with GPT3.5 / GPT 4, just set a prop. value to the GPT Handler
 - Auto-detection when chat.openai.com "slips" to GPT 3.5, so it doesn't mix up content from 3.5 and 4.
