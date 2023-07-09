@@ -1,6 +1,6 @@
 # gpt4_selenium
 
-This project is primarily aimed at developing a bot that utilizes GPT-4 "as it is", with automatization and without using API, which is significantly more expensive than $25. Currently it may not be "perfectly shaped", so if you wan't to make some improvements feel free to do it and sumbit pull request. (However, please understand that I may not accept changes that are not beneficial).
+This project is primarily aimed at developing a bot that utilizes GPT-4 "as it is", with automatization and without using OpenAI API, which is significantly more expensive than $25. Currently it may not be "perfectly shaped", so if you wan't to make some improvements feel free to do it and sumbit pull request. (However, please understand that I may not accept changes that are not beneficial).
 
 ## What is working, basically:
 - It may be used with GPT3.5 / GPT 4, just set a prop. value to the GPT Handler
