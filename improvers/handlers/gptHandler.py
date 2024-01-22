@@ -19,11 +19,11 @@ class ChatGPTHandler:
     button_tq = "button"
     done_xq = '//button[//div[text()="Done"]]'
     chatbox_cq = "text-base"
-    wait_cq = "text-2xl"
-    reset_xq = '//a[text()="New chat"]'
-    continue_gen_xq = (
-        '//*[@id="__next"]/div[2]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]'
-    )
+    wait_xq = '//*[@aria-label="Stop generating"]'
+
+    reset_xq = '//a[//div[text()="New chat"]]'
+    reset2_xq = '/html/body/div[1]/div[1]/div[1]/div/div/div/div/nav/div[2]/div[1]/div/a'
+    continue_gen_xq = '/html/body/div[1]/div[1]/div[2]/main/div[2]/div[2]/form/div/div[1]/div/div[2]/div/button'
     gpt4_btn_xq = '//*[@id="__next"]/div[2]/div[2]/div/main/div[2]/div/div/div[1]/div/div/ul/li[2]/button'
     gpt_version_div = (
         "/html/body/div[1]/div[2]/div[2]/div/main/div[2]/div/div/div/div[1]"
@@ -36,10 +36,14 @@ class ChatGPTHandler:
         headless: bool = False,
         cold_start: bool = False,
         gpt4=False,
-        should_start_with=False,
+        should_start_with='',
+        should_ends_with='',
+        strip_first_3=False
     ):
         self.gpt4 = gpt4
         self.should_start_with = should_start_with
+        self.should_ends_with = should_ends_with
+        self.strip_first_3 = strip_first_3
         options = uc.ChromeOptions()
         options.add_argument("--incognito")
 
@@ -95,22 +99,26 @@ class ChatGPTHandler:
         else:
             pass_box.send_keys(password)
         # Click continue
-        continue_button = self.sleepy_find_element(By.XPATH, self.continue_xq)
+        continue_button = self.sleepy_find_element(By.XPATH, '/html/body/div[1]/main/section/div/div/div/form/div[3]/button')
         continue_button.click()
         time.sleep(3)
+        
 
         # Pass introduction
-        next_button = self.browser.find_element(By.CLASS_NAME, self.next_cq)
-        next_button = next_button.find_elements(By.TAG_NAME, self.button_tq)[0]
-        next_button.click()
-        time.sleep(1)
-        next_button = self.browser.find_element(By.CLASS_NAME, self.next_cq)
-        next_button = next_button.find_elements(By.TAG_NAME, self.button_tq)[1]
-        next_button.click()
-        time.sleep(1)
-        next_button = self.browser.find_element(By.CLASS_NAME, self.next_cq)
-        done_button = next_button.find_elements(By.TAG_NAME, self.button_tq)[1]
-        done_button.click()
+        try:
+            next_button = self.browser.find_element(By.CLASS_NAME, self.next_cq)
+            next_button = next_button.find_elements(By.TAG_NAME, self.button_tq)[0]
+            next_button.click()
+            time.sleep(1)
+            next_button = self.browser.find_element(By.CLASS_NAME, self.next_cq)
+            next_button = next_button.find_elements(By.TAG_NAME, self.button_tq)[1]
+            next_button.click()
+            time.sleep(1)
+            next_button = self.browser.find_element(By.CLASS_NAME, self.next_cq)
+            done_button = next_button.find_elements(By.TAG_NAME, self.button_tq)[1]
+            done_button.click()
+        except:
+            print('No introduction. Skipping...')
 
     def sleepy_find_element(
         self, by, query, attempt_count: int = 30, sleep_duration: int = 1
@@ -173,7 +181,7 @@ class ChatGPTHandler:
             # оновлена версія для швидшого вставлення question в text_area
             print(
                 "-" * 90 +
-                f"\n{C_GREEN}Request:{C_GREEN.OFF} {question}\n" + "-" * 90
+                f"\n{C_GREEN}Request:{C_GREEN.OFF} {question[:45]}...\n" + "-" * 90
             )
             pc.copy(question.strip())
             cmd_ctrl = Keys.COMMAND if sys.platform == "darwin" else Keys.CONTROL
@@ -187,8 +195,9 @@ class ChatGPTHandler:
             if (self.should_start_with) and question != "keep going":
                 time.sleep(2)
                 still_generating = self.browser.find_elements(
-                    By.CLASS_NAME, self.wait_cq
+                    By.XPATH, self.wait_xq
                 )
+                print('SUAQQAAA:', still_generating)
                 if still_generating and len(still_generating):
                     check_answer = self.browser.find_elements(
                         By.CLASS_NAME, self.chatbox_cq
@@ -216,13 +225,30 @@ class ChatGPTHandler:
                             stop_button[0].click()
                         return ""
 
-            self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
+            # when wait_xq dissapeared, look for continue_gen_xq, click and wait for wait_xq dissapear again.
+            # delay between dissapear and appear 3 seconds, repeat 6 times.
+            for _ in range(6):
+                self.wait_to_disappear(By.XPATH, self.wait_xq)
+                time.sleep(3)
+                continue_btn = self.browser.find_elements(By.XPATH, self.continue_gen_xq)
+                if len(continue_btn):
+                    self.continue_generating()
+                    time.sleep(1)
+                else:
+                    break;
+
+            # collect the final answer
             answer = self.browser.find_elements(
                 By.CLASS_NAME, self.chatbox_cq)[-1]
 
             # перевірка на ліміт по відповіді і повернення якщо ні
             self.check_limit_timeout(response=answer.text)
-            return answer.text
+            answer_rt = answer.text
+            if self.strip_first_3: 
+                answer_rt = '\n'.join(answer.text.splitlines()[3:])  
+
+            print(f"{C_RED}ANSWER: {C_RED.OFF}{answer_rt}")
+            return answer_rt
 
     def continue_generating(self):
         # пошук кнопки keep generating, якщо найдеш за 30 спроб - натисни, інакше форс ітерактшн з текстовим keep going
@@ -232,6 +258,10 @@ class ChatGPTHandler:
         if btn_continue_gen:
             btn_continue_gen.click()
             try:
+                btn_continue_gen.click()
+                time.sleep(1)
+                btn_continue_gen.click()
+                time.sleep(1)
                 btn_continue_gen.click()
                 time.sleep(1)
                 btn_continue_gen.click()
@@ -253,7 +283,7 @@ class ChatGPTHandler:
             btn_continue_gen = self.sleepy_find_element(
                 By.XPATH, self.continue_gen_xq, 30, 0.3
             )
-            if fin_answer.strip().endswith("</article>"):
+            if fin_answer.strip().endswith(self.should_ends_with):
                 return fin_answer
             elif not btn_continue_gen:
                 self.interact("keep going", isForced=True)
@@ -276,19 +306,23 @@ class ChatGPTHandler:
             ans_block = self.browser.find_elements(
                 By.CLASS_NAME, self.chatbox_cq)[-1]
             newAnswer = ans_block.text
-            if newAnswer and newAnswer.strip().lower().endswith("</article>"):
+            if newAnswer and newAnswer.strip().lower().endswith(self.should_ends_with):
                 return newAnswer
             elif newAnswer and not answer == newAnswer:
                 answer = newAnswer
             elif newAnswer:
                 isAnswerNotEqual = False
             time.sleep(DELAY_BETWEEN_CHECKS)
-        self.wait_to_disappear(By.CLASS_NAME, self.wait_cq)
+        self.wait_to_disappear(By.XPATH, self.wait_xq)
         return self.browser.find_elements(By.CLASS_NAME, self.chatbox_cq)[-1].text
 
     def reset_thread(self):
         """the conversation is refreshed"""
-        self.browser.find_element(By.XPATH, self.reset_xq).click()
+        try:
+            self.browser.find_element(By.XPATH, self.reset_xq).click()
+        except:
+            self.browser.find_element(By.XPATH, self.reset2_xq).click()
+
 
     def check_limit_timeout(self, response: str):
         if (
@@ -323,6 +357,11 @@ class ChatGPTHandler:
         ):
             print(f"{C_RED}ne minute....{C_RED.OFF}")
             return ""
+        if("You've reached our limit of messages per hour. Please try again later."  in response.strip()):
+            print(
+                f"{C_RED}ChatGPT limit reached. Setting sleep to 30 min...{C_RED.OFF}"
+            )
+            time.sleep(1800)
         if (
             "".join(response.strip().split(" ")).lower().startswith("!")
             and "Only one message at a time" in response.strip().lower()
